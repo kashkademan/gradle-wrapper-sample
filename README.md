@@ -12,3 +12,10 @@
 ## Build & Run (Windows)
 gradlew.bat build
 gradlew.bat run
+
+## Updates
+settings.gradle.kts 
+    -> update the project folder name
+build.gradle.kts
+    -> update java version
+    -> update the main class 
