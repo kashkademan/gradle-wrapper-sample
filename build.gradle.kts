@@ -19,6 +19,14 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.17")
     runtimeOnly("ch.qos.logback:logback-classic:1.5.32")
     runtimeOnly("ch.qos.logback:logback-core:1.5.32")
+
+    // if libs toml is aplied
+    // implementation(libs.jackson.databind)
+    // implementation(libs.jackson.core)
+
+    // implementation(libs.slf4j.api)
+    // classic had transit depedency to core
+    // runtimeOnly(libs.logback.classic)
 }
 
 java {

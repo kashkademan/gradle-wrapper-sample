@@ -1,0 +1,14 @@
+[versions]
+# Версии выносим отдельно, чтобы не дублировать их в каждой зависимости
+jackson = "3.0.4"
+slf4j = "2.0.17"
+logback = "1.5.32"
+
+[libraries]
+# module = "group:artifact"
+# version.ref = ссылка на ключ из секции [versions]
+jackson-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-core = { module = "tools.jackson.core:jackson-core", version.ref = "jackson" }
+
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
