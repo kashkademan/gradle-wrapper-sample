@@ -1,0 +1,123 @@
+{
+  "info": {
+    "_postman_id": "6b0e297b-4c42-4378-acde-1c9c5b6a904f",
+    "name": "DummyJSON Products Smoke",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Поиск товаров",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Smoke проверяет только базовый контракт: статус, тип ответа и ключевые поля.",
+              "// Здесь важно убедиться, что поиск возвращает именно JSON, а не HTML или ошибку.",
+              "pm.test(\"Статус 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Content-Type содержит application/json\", function () {",
+              "  pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});",
+              "const json = pm.response.json();",
+              "// Для поиска нам нужна форма ответа, а не конкретные значения элементов.",
+              "pm.test(\"Есть поля products, total и limit\", function () {",
+              "  pm.expect(json).to.have.property(\"products\");",
+              "  pm.expect(json).to.have.property(\"total\");",
+              "  pm.expect(json).to.have.property(\"limit\");",
+              "  pm.expect(json.products).to.be.an(\"array\");",
+              "  pm.expect(json.total).to.be.a(\"number\");",
+              "  pm.expect(json.limit).to.be.a(\"number\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://dummyjson.com/products/search?q=phone",
+          "protocol": "https",
+          "host": [
+            "dummyjson",
+            "com"
+          ],
+          "path": [
+            "products",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "phone"
+            }
+          ]
+        },
+        "description": "Smoke-проверка сценария поиска товаров."
+      },
+      "response": []
+    },
+    {
+      "name": "Получение деталей товара",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Для details проверяем тот же минимальный набор: статус, JSON и нужные поля.",
+              "// Идентификатор в этом сценарии задаётся в path, поэтому отдельно проверяем только форму ответа.",
+              "pm.test(\"Статус 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Content-Type содержит application/json\", function () {",
+              "  pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});",
+              "const json = pm.response.json();",
+              "// В smoke-наборе нам достаточно убедиться, что карточка товара читается по ключевым полям.",
+              "pm.test(\"Есть поля id, title и price\", function () {",
+              "  pm.expect(json).to.have.property(\"id\");",
+              "  pm.expect(json).to.have.property(\"title\");",
+              "  pm.expect(json).to.have.property(\"price\");",
+              "  pm.expect(json.id).to.be.a(\"number\");",
+              "  pm.expect(json.title).to.be.a(\"string\");",
+              "  pm.expect(json.price).to.be.a(\"number\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://dummyjson.com/products/1",
+          "protocol": "https",
+          "host": [
+            "dummyjson",
+            "com"
+          ],
+          "path": [
+            "products",
+            "1"
+          ]
+        },
+        "description": "Smoke-проверка сценария получения деталей товара."
+      },
+      "response": []
+    }
+  ]
+}

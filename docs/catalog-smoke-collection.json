@@ -1,0 +1,54 @@
+{
+  "info": {
+    "_postman_id": "ab5d9320-1b75-4d9d-97fb-2a17e90d7eaf",
+    "name": "Gutendex Catalog Smoke",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Search books: pride and prejudice",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://gutendex.com/books?search=pride%20and%20prejudice",
+          "protocol": "https",
+          "host": [
+            "gutendex",
+            "com"
+          ],
+          "path": [
+            "books"
+          ],
+          "query": [
+            {
+              "key": "search",
+              "value": "pride and prejudice"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Book details: 1342",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://gutendex.com/books/1342",
+          "protocol": "https",
+          "host": [
+            "gutendex",
+            "com"
+          ],
+          "path": [
+            "books",
+            "1342"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
