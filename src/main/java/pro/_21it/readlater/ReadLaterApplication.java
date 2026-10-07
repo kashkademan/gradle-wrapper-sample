@@ -1,12 +1,14 @@
 package pro._21it.readlater;
 
-import pro._21it.readlater.dto.*;
+import pro._21it.readlater.NetworkRequest;
 import tools.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
 
 public class ReadLaterApplication {
+    private final static String STRING_URL = "https://catalog.example/search?q=clean%20code&limit=5";
+
     public static void main(String[] args) {
         ConsoleBanner.print();
 
@@ -16,38 +18,10 @@ public class ReadLaterApplication {
         String json = new ObjectMapper().writeValueAsString(new Ping("UP"));
         System.out.println(json);
 
-        System.out.println(searchResponse);
-        System.out.println(detailedBook);
+        NetworkRequest networkRequest = new NetworkRequest(STRING_URL);
+        networkRequest.printUri();        
     }
 
     private static record Ping(String status) {
     };
-
-    // DTOs check
-    private static CatalogSearchItemResponse catalogSearchItemResponseFirst = new CatalogSearchItemResponse(
-        "OML001X",
-        "Three Body Problem",
-        "Lu"
-    );
-
-    private static CatalogSearchItemResponse catalogSearchItemResponseSecond = new CatalogSearchItemResponse(
-        "OML002X",
-        "Dark Forest",
-        "Lu"
-    );
-
-    private static CatalogBookDetailsResponse detailedBook = new CatalogBookDetailsResponse(
-        "OML001X",
-        "Tree Body Problem",
-        "Lu",
-        ""
-    );
-
-    private static CatalogSearchResponse searchResponse = new CatalogSearchResponse(
-        List.of(
-            catalogSearchItemResponseFirst,
-            catalogSearchItemResponseSecond
-        ),
-        2
-    );
 }
