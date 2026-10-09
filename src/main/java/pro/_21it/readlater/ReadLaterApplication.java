@@ -1,7 +1,5 @@
 package pro._21it.readlater;
 
-import pro._21it.readlater.NetworkRequest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tools.jackson.databind.ObjectMapper;
@@ -21,6 +19,7 @@ public class ReadLaterApplication {
     private final static HttpClient client = HttpClient.newBuilder()
         .connectTimeout(Duration.ofSeconds(9))
         .build();
+    private final static ObjectMapper mapper = JsonMapper.getInstance();
     private static String query = "";
     private static HttpResponse<String> response;
 
@@ -30,7 +29,7 @@ public class ReadLaterApplication {
         Logger logger = LoggerFactory.getLogger(ReadLaterApplication.class);
         logger.info("Readlater Starter is running");
 
-        String json = new ObjectMapper().writeValueAsString(new Ping("UP"));
+        String json = mapper.writeValueAsString(new Ping("UP"));
         System.out.println(json);
 
         URI searchUri = NetworkRequest.buildSearchUri(BASE_URL, QUERY);
@@ -40,7 +39,10 @@ public class ReadLaterApplication {
         logger.info("Details URI: " + detailsUri);
 
         try {
-            HttpResponse<String> response = client.send(NetworkRequest.buildGetRequest(searchUri), HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = client.send(
+                    NetworkRequest.buildGetRequest(searchUri), 
+                    HttpResponse.BodyHandlers.ofString()
+            );
             int status = response.statusCode();
             logger.info(is2xx(status) ? "SUCCESS: " + status : "ERROR: " + status);
         } catch (HttpTimeoutException e) {
