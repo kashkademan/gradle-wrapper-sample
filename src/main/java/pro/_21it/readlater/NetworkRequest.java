@@ -43,13 +43,4 @@ public class NetworkRequest {
             .build();
     }
 
-    // public HttpResponse<String> getJson() throws Exception {
-    //     HttpRequest request = HttpRequest.newBuilder(uri)
-    //         .header("Accept", "application/json")
-    //         .GET()
-    //         .build();
-
-    //     return client.send(request, HttpResponse.BodyHandlers.ofString());
-    // }
-
 }
