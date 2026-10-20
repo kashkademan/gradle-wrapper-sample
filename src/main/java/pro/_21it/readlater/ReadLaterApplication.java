@@ -8,6 +8,7 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpTimeoutException;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Arrays;
 
 import pro._21it.readlater.dto.provider.*;
 
@@ -54,4 +55,21 @@ public class ReadLaterApplication {
     public static boolean is2xx(int status) {
         return status >= 200 && status <= 200;
     };
+
+    private static CatalogCommand parseCatalogCommand(String[] args) {
+        if (args.length < 2) return null;
+
+        if (!args[0].equals("catalogue")) return null;
+
+        if (args[1].equals("search") && args.length >= 3) {
+            String query = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
+            return new CatalogCommand(CatalogCommandType.SEARCH, query);
+        }
+
+        if (args[1].equals("details") && args.length == 3) {
+            return new CatalogCommand(CatalogCommandType.DETAILS, args[2]);
+        }
+
+        return null;
+    }
 }
