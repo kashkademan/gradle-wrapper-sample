@@ -8,9 +8,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 public class NetworkRequest {
-    public static URI buildSearchUri(String baseUrl, String query) {
+    public static URI buildSearchUri(String baseUrl, String query, Integer limit) {
         String encodedQuery  = URLEncoder.encode(query, StandardCharsets.UTF_8);
-        return URI.create(baseUrl + "/search?q=" + encodedQuery);
+        return URI.create(baseUrl + "/search?q=" + encodedQuery + "&limit=" + limit);
     }
 
     public static URI buildDetailsUri(String baseUrl, String externalId) {

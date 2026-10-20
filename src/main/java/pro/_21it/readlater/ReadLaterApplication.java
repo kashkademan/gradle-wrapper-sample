@@ -12,8 +12,8 @@ import java.io.IOException;
 import java.time.Duration;
 
 public class ReadLaterApplication {
-    private final static String STRING_URL = "https://openlibrary.org/search.json?q=";
     private final static String BASE_URL = "https://openlibrary.org";
+    private final static Integer QUERY_LIMIT = 2;
     private final static String QUERY = "java & spring";
     private final static String EXTERNAL_ID = "OL12345M";
     private final static HttpClient client = HttpClient.newBuilder()
@@ -29,10 +29,7 @@ public class ReadLaterApplication {
         Logger logger = LoggerFactory.getLogger(ReadLaterApplication.class);
         logger.info("Readlater Starter is running");
 
-        String json = mapper.writeValueAsString(new Ping("UP"));
-        System.out.println(json);
-
-        URI searchUri = NetworkRequest.buildSearchUri(BASE_URL, QUERY);
+        URI searchUri = NetworkRequest.buildSearchUri(BASE_URL, QUERY, QUERY_LIMIT);
         URI detailsUri = NetworkRequest.buildDetailsUri(BASE_URL, EXTERNAL_ID);
 
         logger.info("Search URI: " + searchUri);
@@ -54,9 +51,6 @@ public class ReadLaterApplication {
             logger.error("INTERRUPTED");
         }
     }
-
-    private static record Ping(String status) {
-    };
 
     public static boolean is2xx(int status) {
         return status >= 200 && status <=200;
