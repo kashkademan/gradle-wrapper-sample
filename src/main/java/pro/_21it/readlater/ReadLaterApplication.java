@@ -2,8 +2,6 @@ package pro._21it.readlater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tools.jackson.databind.ObjectMapper;
-import java.util.List;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
@@ -17,11 +15,8 @@ public class ReadLaterApplication {
     private final static String QUERY = "java & spring";
     private final static String EXTERNAL_ID = "OL12345M";
     private final static HttpClient client = HttpClient.newBuilder()
-        .connectTimeout(Duration.ofSeconds(9))
-        .build();
-    private final static ObjectMapper mapper = JsonMapper.getInstance();
-    private static String query = "";
-    private static HttpResponse<String> response;
+            .connectTimeout(Duration.ofSeconds(9))
+            .build();
 
     public static void main(String[] args) {
         ConsoleBanner.print();
@@ -37,9 +32,8 @@ public class ReadLaterApplication {
 
         try {
             HttpResponse<String> response = client.send(
-                    NetworkRequest.buildGetRequest(searchUri), 
-                    HttpResponse.BodyHandlers.ofString()
-            );
+                    NetworkRequest.buildGetRequest(searchUri),
+                    HttpResponse.BodyHandlers.ofString());
             int status = response.statusCode();
             logger.info(is2xx(status) ? "SUCCESS: " + status : "ERROR: " + status);
         } catch (HttpTimeoutException e) {
@@ -53,6 +47,6 @@ public class ReadLaterApplication {
     }
 
     public static boolean is2xx(int status) {
-        return status >= 200 && status <=200;
+        return status >= 200 && status <= 200;
     };
 }
