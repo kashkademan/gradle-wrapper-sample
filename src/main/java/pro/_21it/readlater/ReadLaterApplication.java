@@ -9,14 +9,17 @@ import java.net.http.HttpTimeoutException;
 import java.io.IOException;
 import java.time.Duration;
 
+import pro._21it.readlater.dto.provider.*;
+
 public class ReadLaterApplication {
     private final static String BASE_URL = "https://openlibrary.org";
     private final static Integer QUERY_LIMIT = 2;
-    private final static String QUERY = "java & spring";
+    private final static String QUERY = "clean code";
     private final static String EXTERNAL_ID = "OL12345M";
     private final static HttpClient client = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(9))
             .build();
+    private final static ProviderJsonReader jsonReader = new ProviderJsonReader();
 
     public static void main(String[] args) {
         ConsoleBanner.print();
@@ -36,6 +39,8 @@ public class ReadLaterApplication {
                     HttpResponse.BodyHandlers.ofString());
             int status = response.statusCode();
             logger.info(is2xx(status) ? "SUCCESS: " + status : "ERROR: " + status);
+            ProviderSearchResponseDto responseDto = jsonReader.read(response.body(), ProviderSearchResponseDto.class);
+            logger.info("response dto: " + responseDto);
         } catch (HttpTimeoutException e) {
             logger.error("REQUEST_TIMEOUT");
         } catch (IOException e) {

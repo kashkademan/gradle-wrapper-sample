@@ -2,10 +2,10 @@ package pro._21it.readlater;
 
 import tools.jackson.databind.ObjectMapper;
 
-public final class JsonMapper {
+public final class JsonMapperLocal {
     private static final ObjectMapper INSTANCE = new ObjectMapper();
 
-    private JsonMapper() {
+    private JsonMapperLocal() {
     }
 
     public static ObjectMapper getInstance() {

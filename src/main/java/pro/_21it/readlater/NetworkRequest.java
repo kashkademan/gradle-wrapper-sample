@@ -10,7 +10,7 @@ import java.time.Duration;
 public class NetworkRequest {
     public static URI buildSearchUri(String baseUrl, String query, Integer limit) {
         String encodedQuery  = URLEncoder.encode(query, StandardCharsets.UTF_8);
-        return URI.create(baseUrl + "/search?q=" + encodedQuery + "&limit=" + limit);
+        return URI.create(baseUrl + "/search.json?q=" + encodedQuery + "&limit=" + limit);
     }
 
     public static URI buildDetailsUri(String baseUrl, String externalId) {
