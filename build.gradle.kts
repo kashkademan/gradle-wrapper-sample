@@ -38,5 +38,5 @@ java {
 
 application {
     // Точка входа приложения
-    mainClass = "pro._21it.readlater.ReadLaterApplication"
+    mainClass = "pro._21it.readlater.app.ReadLaterApplication"
 }

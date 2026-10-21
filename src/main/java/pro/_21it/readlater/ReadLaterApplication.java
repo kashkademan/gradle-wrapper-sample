@@ -21,6 +21,7 @@ public class ReadLaterApplication {
             .connectTimeout(Duration.ofSeconds(9))
             .build();
     private final static ProviderJsonReader jsonReader = new ProviderJsonReader();
+    private static CommandRouter commandRouter;
 
     public static void main(String[] args) {
         ConsoleBanner.print();
@@ -28,48 +29,35 @@ public class ReadLaterApplication {
         Logger logger = LoggerFactory.getLogger(ReadLaterApplication.class);
         logger.info("Readlater Starter is running");
 
+        CatalogCommand catalogCommand = new CommandRouter().run(args);
+        logger.info("Command: {}", catalogCommand);
+
         URI searchUri = NetworkRequest.buildSearchUri(BASE_URL, QUERY, QUERY_LIMIT);
         URI detailsUri = NetworkRequest.buildDetailsUri(BASE_URL, EXTERNAL_ID);
 
         logger.info("Search URI: " + searchUri);
         logger.info("Details URI: " + detailsUri);
 
-        try {
-            HttpResponse<String> response = client.send(
-                    NetworkRequest.buildGetRequest(searchUri),
-                    HttpResponse.BodyHandlers.ofString());
-            int status = response.statusCode();
-            logger.info(is2xx(status) ? "SUCCESS: " + status : "ERROR: " + status);
-            ProviderSearchResponseDto responseDto = jsonReader.read(response.body(), ProviderSearchResponseDto.class);
-            logger.info("response dto: " + responseDto);
-        } catch (HttpTimeoutException e) {
-            logger.error("REQUEST_TIMEOUT");
-        } catch (IOException e) {
-            logger.error("IO_ERROR");
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            logger.error("INTERRUPTED");
-        }
+        // try {
+        //     HttpResponse<String> response = client.send(
+        //             NetworkRequest.buildGetRequest(searchUri),
+        //             HttpResponse.BodyHandlers.ofString());
+        //     int status = response.statusCode();
+        //     logger.info(is2xx(status) ? "SUCCESS: " + status : "ERROR: " + status);
+        //     ProviderSearchResponseDto responseDto = jsonReader.read(response.body(), ProviderSearchResponseDto.class);
+        //     logger.info("response dto: " + responseDto);
+        // } catch (HttpTimeoutException e) {
+        //     logger.error("REQUEST_TIMEOUT");
+        // } catch (IOException e) {
+        //     logger.error("IO_ERROR");
+        // } catch (InterruptedException e) {
+        //     Thread.currentThread().interrupt();
+        //     logger.error("INTERRUPTED");
+        // }
     }
 
     public static boolean is2xx(int status) {
         return status >= 200 && status <= 200;
     };
 
-    private static CatalogCommand parseCatalogCommand(String[] args) {
-        if (args.length < 2) return null;
-
-        if (!args[0].equals("catalogue")) return null;
-
-        if (args[1].equals("search") && args.length >= 3) {
-            String query = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
-            return new CatalogCommand(CatalogCommandType.SEARCH, query);
-        }
-
-        if (args[1].equals("details") && args.length == 3) {
-            return new CatalogCommand(CatalogCommandType.DETAILS, args[2]);
-        }
-
-        return null;
-    }
 }
