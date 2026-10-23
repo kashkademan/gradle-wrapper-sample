@@ -1,0 +1,38 @@
+package pro._21it.readlater.config;
+
+import java.util.Properties;
+
+public class AppConfigFactory {
+    public static AppConfig from(Properties props) {
+        ConfigReader r = new ConfigReader(props);
+
+        CatalogConfig catalog = new CatalogConfig(
+                Uris.requiredUri(r.required(ConfigKeys.CATALOG_BASE_URL), ConfigKeys.CATALOG_BASE_URL),
+                Durations.msOrDefault(
+                    r.optional(ConfigKeys.CATALOG_REQUEST_TIMEOUT_MS, "2000"),
+                    2000,
+                    ConfigKeys.CATALOG_REQUEST_TIMEOUT_MS
+                ),
+                Modes.parse(
+                    r.optional(ConfigKeys.CATALOG_MODE, "mock"),
+                    CatalogApiMode.MOCK,
+                    ConfigKeys.CATALOG_MODE
+                )
+        );
+
+        ServerConfig server = new ServerConfig(
+                r.optional(ConfigKeys.SERVER_HOST, "localhost"),
+                Parse.intOrDefault(
+                    r.optional(ConfigKeys.SERVER_PORT, "8080"),
+                    8080,
+                    ConfigKeys.SERVER_PORT
+                )
+        );
+
+        return new AppConfig(
+                r.optional(ConfigKeys.APP_NAME, "readlater"),
+                catalog,
+                server
+        );
+    }
+}
