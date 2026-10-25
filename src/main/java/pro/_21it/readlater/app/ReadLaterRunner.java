@@ -1,9 +1,12 @@
 package pro._21it.readlater.app;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pro._21it.readlater.config.AppConfig;
 
 public class ReadLaterRunner {
     private final AppConfig config;
+    private static final Logger logger = LoggerFactory.getLogger(ReadLaterRunner.class);
 
     public ReadLaterRunner(AppConfig config) {
         this.config = config;
@@ -19,16 +22,12 @@ public class ReadLaterRunner {
     }
 
     private void startServer(LaunchCommand command) {
-        printToConsole(command.summary());    
+        logger.debug(command.summary());
     };
     private void searchCatalog(LaunchCommand command) {
-        printToConsole(command.summary());    
+        logger.info(command.summary());
     };
     private void showDetails(LaunchCommand command) {
-        printToConsole(command.summary());    
+        logger.info(command.summary());
     };
-
-    private void printToConsole(String message) {
-        System.out.println(message);
-    }
 }

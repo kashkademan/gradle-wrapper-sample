@@ -1,0 +1,20 @@
+<configuration>
+    <!-- Appender — это "куда писать". Здесь пишем в stderr -->
+    <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.err</target>
+        <encoder>
+            <!-- Pattern — это "как выглядит строка лога" -->
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Подробные логи только для каталога -->
+    <logger name="pro._21it.readlater.catalog" level="DEBUG"/>
+    <logger name="pro._21it.readlater.app.ReadLaterRunner" level="DEBUG"/>
+
+    <!-- root level — уровень по умолчанию для всех логгеров -->
+    <root level="INFO">
+        <!-- Подключаем appender к root, иначе он не будет использоваться -->
+        <appender-ref ref="STDERR"/>
+    </root>
+</configuration>

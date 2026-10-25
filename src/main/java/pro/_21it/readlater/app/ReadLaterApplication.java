@@ -9,8 +9,9 @@ import pro._21it.readlater.config.AppConfigFactory;
 import pro._21it.readlater.config.PropertiesLoader;
 
 public final class ReadLaterApplication {
+    private static final Logger logger = LoggerFactory.getLogger(ReadLaterApplication.class);
+
     public static void main(String[] args) {
-        Logger logger = LoggerFactory.getLogger(ReadLaterApplication.class);
         AppConfig config = AppConfigFactory.from(new PropertiesLoader().load(), System.getenv());
         
         LaunchCommand cmd;
