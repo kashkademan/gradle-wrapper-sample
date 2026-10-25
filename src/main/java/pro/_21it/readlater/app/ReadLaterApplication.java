@@ -11,9 +11,21 @@ import pro._21it.readlater.config.PropertiesLoader;
 public final class ReadLaterApplication {
     public static void main(String[] args) {
         Logger logger = LoggerFactory.getLogger(ReadLaterApplication.class);
-        AppConfig config = AppConfigFactory.from(new PropertiesLoader().load());
+        AppConfig config = AppConfigFactory.from(new PropertiesLoader().load(), System.getenv());
+        
+        LaunchCommand cmd;
+        try {
+            cmd = LaunchCommandParser.parse(args);
+        } catch (IllegalArgumentException e) {
+            logger.error(e.getMessage());
+            return;
+        }
 
         logger.info("Readlater Starter is running");
-        logger.info("The base-url: {}", config.catalog().baseUri());
+        logger.info("The catalog mode: {}", config.catalog().mode());
+        logger.info("The server port: {}", config.server().port());
+
+        ReadLaterRunner runner = new ReadLaterRunner(config);
+        runner.run(cmd);
     }
 }
