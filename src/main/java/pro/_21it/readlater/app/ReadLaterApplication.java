@@ -23,8 +23,6 @@ public final class ReadLaterApplication {
         }
 
         logger.info("Readlater Starter is running");
-        logger.info("The catalog mode: {}", config.catalog().mode());
-        logger.info("The server port: {}", config.server().port());
 
         ReadLaterRunner runner = new ReadLaterRunner(config);
         runner.run(cmd);
