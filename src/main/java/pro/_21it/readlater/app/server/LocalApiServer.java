@@ -16,10 +16,14 @@ public class LocalApiServer {
         HttpServer server = HttpServer.create(address, 0);
         server.start();
 
+        // Регистрируем endpoint /health и прокидываем config в обработчик
+        server.createContext("/", new ReadingListHandler());
+
         LOGGER.info("Local API started: http://{}:{}", serverConfig.host(), serverConfig.port());
         LOGGER.info("Press Ctrl+C to stop the server.");
         LOGGER.info("Launch mode: SERVER");
 
         return server;
     }
+
 }

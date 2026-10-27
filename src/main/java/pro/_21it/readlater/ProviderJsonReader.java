@@ -3,11 +3,15 @@ package pro._21it.readlater;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.core.JacksonException;
 
-public class ProviderJsonReader {
-    private final JsonMapper mapper = JsonMapper.builder()
+public final class ProviderJsonReader {
+    private final static JsonMapper mapper = JsonMapper.builder()
             .build();
 
-    public <T> T read(String json, Class<T> type) {
+    public static JsonMapper getMapper() {
+        return mapper;
+    }
+
+    public static <T> T read(String json, Class<T> type) {
         try {
             return mapper.readValue(json, type);
         } catch (JacksonException e) {
