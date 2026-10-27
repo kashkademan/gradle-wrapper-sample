@@ -1,4 +1,4 @@
-package pro._21it.readlater.catalog.clinet;
+package pro._21it.readlater.catalog.client;
 
 import pro._21it.readlater.catalog.dto.provider.ProviderSearchResponseDto;
 

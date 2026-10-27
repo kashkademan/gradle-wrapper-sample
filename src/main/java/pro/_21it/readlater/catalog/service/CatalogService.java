@@ -2,7 +2,7 @@ package pro._21it.readlater.catalog.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pro._21it.readlater.catalog.clinet.CatalogClient;
+import pro._21it.readlater.catalog.client.CatalogClient;
 
 public class CatalogService {
     // Логгер на класс: по нему удобно фильтровать логи в конфигурации
