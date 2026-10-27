@@ -2,8 +2,6 @@ package pro._21it.readlater.app;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.InputStream;
-import java.util.Properties;
 import pro._21it.readlater.config.AppConfig;
 import pro._21it.readlater.config.AppConfigFactory;
 import pro._21it.readlater.config.PropertiesLoader;
