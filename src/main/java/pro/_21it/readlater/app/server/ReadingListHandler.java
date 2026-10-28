@@ -147,4 +147,20 @@ final class ReadingListHandler implements HttpHandler {
             throw new IllegalArgumentException("Content-Type должен быть application/json");
         }
     }
+
+    private void writeResponse(HttpExchange exchange, int status, String body) throws IOException {
+        byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+
+        // Явно указываем текстовый ответ в UTF-8, чтобы клиент корректно интерпретировал тело.
+        exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
+
+        // Перед отправкой тела нужно сначала объявить статус и длину ответа.
+        exchange.sendResponseHeaders(status, bytes.length);
+
+        // Response body обязательно закрываем через try-with-resources.
+        // Это гарантирует, что ответ будет корректно завершён и ресурсы освободятся.
+        try (OutputStream outputStream = exchange.getResponseBody()) {
+            outputStream.write(bytes);
+        }
+    }
 }
