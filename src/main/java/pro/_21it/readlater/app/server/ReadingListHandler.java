@@ -5,13 +5,19 @@ import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.net.URLDecoder;
+import java.net.URI;
+import java.util.List;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import tools.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro._21it.readlater.ProviderJsonReader;
 
 final class ReadingListHandler implements HttpHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LocalApiServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReadingListHandler.class);
     private static final JsonMapper JSON_MAPPER = ProviderJsonReader.getMapper();
 
     @Override
@@ -71,6 +77,32 @@ final class ReadingListHandler implements HttpHandler {
 
     private void handleGetByIdRoute(HttpExchange exchange) throws IOException {
         LOGGER.info("We are in {}", exchange.getRequestURI().getPath());
+
+        URI uri = exchange.getRequestURI();
+        Map<String, String> queryParams = parseQuery(uri.getRawQuery());
+        String status = queryParams.get("status");
+        String title = queryParams.get("title");
+
+        String path = exchange.getRequestURI().getPath();
+        long id = 0L;
+
+        List<String> pathSegments = Arrays.stream(path.split("/"))
+            .filter(s -> !s.isBlank())
+            .toList();
+
+        if (pathSegments.isEmpty()) {
+            throw new IllegalArgumentException("The path is empty");
+        }
+
+        String lastSegment = pathSegments.get(pathSegments.size() - 1);
+        try {
+            id = Long.parseLong(lastSegment);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("id must be a number");
+        }
+
+        LOGGER.info("Processing ID is {}", id);
+
         return;
     }
 
@@ -81,6 +113,38 @@ final class ReadingListHandler implements HttpHandler {
 
         try (OutputStream outputStream = exchange.getResponseBody()) {
             outputStream.write(bodyBytes);
+        }
+    }
+
+    private String decode(String value) {
+        return URLDecoder.decode(value, StandardCharsets.UTF_8);
+    }
+
+    private Map<String, String> parseQuery(String query) {
+        Map<String, String> result = new HashMap<>();
+
+        if (query == null || query.isBlank()) return result;
+
+        for (String pair : query.split("&")) {
+            String[] parts = pair.split("=", 2);
+            String key = decode(parts[0]);
+            String value = parts.length == 2 ? decode(parts[1]) : "";
+
+            result.put(key, value);
+        }
+
+        return result;
+    }
+
+    private boolean isJsonContentType(String contentType) {
+        // null — нормальный вариант для запросов без body
+        return contentType != null && contentType.startsWith("application/json");
+    }
+
+    private void requireJsonContentType(String contentType) {
+        // Проверка нужна только там, где реально ожидается JSON-тело
+        if (!isJsonContentType(contentType)) {
+            throw new IllegalArgumentException("Content-Type должен быть application/json");
         }
     }
 }
