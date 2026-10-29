@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.net.URLDecoder;
 import java.net.URI;
@@ -15,6 +16,7 @@ import tools.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro._21it.readlater.ProviderJsonReader;
+import pro._21it.readlater.dto.CreateReadingItemRequest;
 
 final class ReadingListHandler implements HttpHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReadingListHandler.class);
@@ -47,27 +49,20 @@ final class ReadingListHandler implements HttpHandler {
             return;
         }
 
-        // 4) Ветка по умолчанию: ничего не подошло
+        // 4) Проверка пост маршрута
+        if ("POST".equals(method) && path.startsWith("/api/v1/reading-list")) {
+            handleCreateReadingList(exchange);
+            return;
+        }
+
+        // 5) Ветка по умолчанию: ничего не подошло
         sendNotFound(exchange);
     }
 
     private void handleHealth(HttpExchange exchange) throws IOException {
-        // 1) Готовим DTO ответа (часть контракта)
         HealthResponse response = new HealthResponse("UP", "readlater-starter");
-
-        // 2) Сериализуем в байты, чтобы точно знать длину ответа
-        byte[] body = JSON_MAPPER.writeValueAsBytes(response);
-
-        // 3) Выставляем заголовки ДО sendResponseHeaders
-        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
-
-        // 4) Объявляем статус и длину ответа
-        exchange.sendResponseHeaders(200, body.length);
-
-        // 5) Пишем тело и обязательно закрываем поток (try-with-resources)
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(body);
-        }
+        String jsonBody = JSON_MAPPER.writeValueAsString(response);
+        writeResponse(exchange, 200, jsonBody);
     }
 
     private void handleList(HttpExchange exchange) throws IOException {
@@ -106,14 +101,24 @@ final class ReadingListHandler implements HttpHandler {
         return;
     }
 
-    private void sendNotFound(HttpExchange exchange) throws IOException {
-        byte[] bodyBytes = "Route not found".getBytes(StandardCharsets.UTF_8);
-        exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
-        exchange.sendResponseHeaders(404, bodyBytes.length);
+    private void handleCreateReadingList(HttpExchange exchange) throws IOException {
+        LOGGER.info("We are in {}", exchange.getRequestURI().getPath());
 
-        try (OutputStream outputStream = exchange.getResponseBody()) {
-            outputStream.write(bodyBytes);
+        requireJsonContentType(exchange);
+        String body = readBody(exchange);
+        if (body.isBlank()) {
+            throw new IllegalArgumentException("The body is mandatory");
         }
+        CreateReadingItemRequest request = ProviderJsonReader.read(body, CreateReadingItemRequest.class);
+        CreatedResponse response = new CreatedResponse(request.toString());
+        String jsonBody = JSON_MAPPER.writeValueAsString(response);
+        writeResponse(exchange, 201, jsonBody);
+    }
+
+    private void sendNotFound(HttpExchange exchange) throws IOException {
+        NotFoundResponse response = new NotFoundResponse("The path is not found");
+        String jsonBody = JSON_MAPPER.writeValueAsString(response);
+        writeResponse(exchange, 404, jsonBody);
     }
 
     private String decode(String value) {
@@ -136,15 +141,23 @@ final class ReadingListHandler implements HttpHandler {
         return result;
     }
 
-    private boolean isJsonContentType(String contentType) {
+    private boolean isJsonContentType(HttpExchange exchange) {
+        String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
         // null — нормальный вариант для запросов без body
         return contentType != null && contentType.startsWith("application/json");
     }
 
-    private void requireJsonContentType(String contentType) {
+    private void requireJsonContentType(HttpExchange exchange) {
         // Проверка нужна только там, где реально ожидается JSON-тело
-        if (!isJsonContentType(contentType)) {
+        if (!isJsonContentType(exchange)) {
             throw new IllegalArgumentException("Content-Type должен быть application/json");
+        }
+    }
+
+    private String readBody(HttpExchange exchange) throws IOException {
+        try (InputStream stream = exchange.getRequestBody()) {
+            byte[] bytes = stream.readAllBytes();
+            return new String(bytes, StandardCharsets.UTF_8);
         }
     }
 
@@ -152,7 +165,7 @@ final class ReadingListHandler implements HttpHandler {
         byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
 
         // Явно указываем текстовый ответ в UTF-8, чтобы клиент корректно интерпретировал тело.
-        exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
+        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
 
         // Перед отправкой тела нужно сначала объявить статус и длину ответа.
         exchange.sendResponseHeaders(status, bytes.length);
