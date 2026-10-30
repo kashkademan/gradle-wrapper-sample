@@ -24,7 +24,12 @@ final class ReadingListHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        route(exchange);
+       LOGGER.info("{} {}", exchange.getRequestMethod(), exchange.getRequestURI().getPath());
+        try {
+            route(exchange);
+        } catch (IllegalArgumentException e) {
+            LOGGER.warn("Bad request {}", e.getMessage(), e);
+        }
     }
 
     private void route(HttpExchange exchange) throws IOException {
