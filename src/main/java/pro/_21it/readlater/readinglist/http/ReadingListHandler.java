@@ -81,8 +81,6 @@ final public class ReadingListHandler implements HttpHandler {
     }
 
     private void handleGetByIdRoute(HttpExchange exchange) throws IOException {
-        logger.info("We are in {}", exchange.getRequestURI().getPath());
-
         URI uri = exchange.getRequestURI();
         Map<String, String> queryParams = parseQuery(uri.getRawQuery());
         String status = queryParams.get("status");
