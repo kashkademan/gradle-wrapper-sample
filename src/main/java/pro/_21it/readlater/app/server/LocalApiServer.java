@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import pro._21it.readlater.config.ServerConfig;
+import pro._21it.readlater.readinglist.http.ReadingListHandler;
 
 public class LocalApiServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalApiServer.class);

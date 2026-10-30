@@ -1,4 +1,4 @@
-package pro._21it.readlater.app.server;
+package pro._21it.readlater.readinglist.http;
 
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
@@ -17,18 +17,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro._21it.readlater.ProviderJsonReader;
 import pro._21it.readlater.dto.CreateReadingItemRequest;
+import pro._21it.readlater.readinglist.service.ReadingListService;
+import pro._21it.readlater.readinglist.service.ReadingListServiceInMemoryImpl;
+import pro._21it.readlater.readinglist.domain.ReadingListItem;
 
-final class ReadingListHandler implements HttpHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReadingListHandler.class);
-    private static final JsonMapper JSON_MAPPER = ProviderJsonReader.getMapper();
+final public class ReadingListHandler implements HttpHandler {
+    private final Logger logger = LoggerFactory.getLogger(ReadingListHandler.class);
+    private final JsonMapper JSON_MAPPER = ProviderJsonReader.getMapper();
+    private final ReadingListService service = new ReadingListServiceInMemoryImpl();
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-       LOGGER.info("{} {}", exchange.getRequestMethod(), exchange.getRequestURI().getPath());
+       logger.info("{} {}", exchange.getRequestMethod(), exchange.getRequestURI().getPath());
         try {
             route(exchange);
         } catch (IllegalArgumentException e) {
-            LOGGER.warn("Bad request {}", e.getMessage(), e);
+            logger.warn("Bad request {}", e.getMessage(), e);
         }
     }
 
@@ -71,12 +75,13 @@ final class ReadingListHandler implements HttpHandler {
     }
 
     private void handleList(HttpExchange exchange) throws IOException {
-        LOGGER.info("We are in {}", exchange.getRequestURI().getPath());
+        logger.info("We are in {}", exchange.getRequestURI().getPath());
+        exchange.close();
         return;
     }
 
     private void handleGetByIdRoute(HttpExchange exchange) throws IOException {
-        LOGGER.info("We are in {}", exchange.getRequestURI().getPath());
+        logger.info("We are in {}", exchange.getRequestURI().getPath());
 
         URI uri = exchange.getRequestURI();
         Map<String, String> queryParams = parseQuery(uri.getRawQuery());
@@ -101,13 +106,16 @@ final class ReadingListHandler implements HttpHandler {
             throw new IllegalArgumentException("id must be a number");
         }
 
-        LOGGER.info("Processing ID is {}", id);
+        logger.info("Processing ID is {}", id);
+        ReadingListItem item = service.findById(id);
+        logger.info("The item found {}", item.getTitle());
 
+        exchange.close();
         return;
     }
 
     private void handleCreateReadingList(HttpExchange exchange) throws IOException {
-        LOGGER.info("We are in {}", exchange.getRequestURI().getPath());
+        logger.info("We are in {}", exchange.getRequestURI().getPath());
 
         requireJsonContentType(exchange);
         String body = readBody(exchange);
