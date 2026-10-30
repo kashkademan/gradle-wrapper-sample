@@ -20,6 +20,7 @@ import pro._21it.readlater.dto.CreateReadingItemRequest;
 import pro._21it.readlater.readinglist.service.ReadingListService;
 import pro._21it.readlater.readinglist.service.ReadingListServiceInMemoryImpl;
 import pro._21it.readlater.readinglist.dto.ReadingItemResponse;
+import pro._21it.readlater.readinglist.dto.ReadingListResponse;
 
 final public class ReadingListHandler implements HttpHandler {
     private final Logger logger = LoggerFactory.getLogger(ReadingListHandler.class);
@@ -75,9 +76,9 @@ final public class ReadingListHandler implements HttpHandler {
     }
 
     private void handleList(HttpExchange exchange) throws IOException {
-        logger.info("We are in {}", exchange.getRequestURI().getPath());
-        exchange.close();
-        return;
+        ReadingListResponse response = service.findAll();
+        String jsonBody = JSON_MAPPER.writeValueAsString(response);
+        writeResponse(exchange, 200, jsonBody);
     }
 
     private void handleGetByIdRoute(HttpExchange exchange) throws IOException {
@@ -116,8 +117,6 @@ final public class ReadingListHandler implements HttpHandler {
     }
 
     private void handleCreateReadingList(HttpExchange exchange) throws IOException {
-        logger.info("We are in {}", exchange.getRequestURI().getPath());
-
         requireJsonContentType(exchange);
         String body = readBody(exchange);
         if (body.isBlank()) {
