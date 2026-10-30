@@ -19,7 +19,7 @@ import pro._21it.readlater.ProviderJsonReader;
 import pro._21it.readlater.dto.CreateReadingItemRequest;
 import pro._21it.readlater.readinglist.service.ReadingListService;
 import pro._21it.readlater.readinglist.service.ReadingListServiceInMemoryImpl;
-import pro._21it.readlater.readinglist.domain.ReadingListItem;
+import pro._21it.readlater.readinglist.dto.ReadingItemResponse;
 
 final public class ReadingListHandler implements HttpHandler {
     private final Logger logger = LoggerFactory.getLogger(ReadingListHandler.class);
@@ -107,11 +107,10 @@ final public class ReadingListHandler implements HttpHandler {
         }
 
         logger.info("Processing ID is {}", id);
-        ReadingListItem item = service.findById(id);
-        logger.info("The item found {}", item.getTitle());
+        ReadingItemResponse response = service.findById(id);
+        String jsonBody = JSON_MAPPER.writeValueAsString(response);
 
-        exchange.close();
-        return;
+        writeResponse(exchange, 200, jsonBody);
     }
 
     private void handleCreateReadingList(HttpExchange exchange) throws IOException {

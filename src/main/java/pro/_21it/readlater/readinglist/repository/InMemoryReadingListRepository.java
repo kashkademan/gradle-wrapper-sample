@@ -17,8 +17,8 @@ public class InMemoryReadingListRepository implements ReadingListRepository {
 
     public InMemoryReadingListRepository() {
     // Стартовые данные нужны только для демонстрации read-only эндпоинтов.
-        putSample("Clean Code", "Robert C. Martin", ReadingStatus.PLANNED, "OL12345M");
-        putSample("Effective Java", "Joshua Bloch", ReadingStatus.IN_PROGRESS, "OL67890M");
+        putSample("Clean Code", "Robert C. Martin", ReadingStatus.PLANNED, "OL12345M", "comment 1");
+        putSample("Effective Java", "Joshua Bloch", ReadingStatus.IN_PROGRESS, "OL67890M", "comment 2");
     }
 
     @Override
@@ -31,9 +31,9 @@ public class InMemoryReadingListRepository implements ReadingListRepository {
         return storage.get(id);
     }
 
-    private void putSample(String title, String author, ReadingStatus status, String externalId) {
+    private void putSample(String title, String author, ReadingStatus status, String externalId, String comment) {
         long id = nextId.incrementAndGet();
-        ReadingListItem item = new ReadingListItem(id, title, author, status, externalId, null);
+        ReadingListItem item = new ReadingListItem(id, title, author, status, externalId, comment);
         storage.put(id, item);
     }
 }
