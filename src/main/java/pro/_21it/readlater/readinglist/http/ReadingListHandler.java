@@ -21,6 +21,7 @@ import pro._21it.readlater.readinglist.service.ReadingListService;
 import pro._21it.readlater.readinglist.service.ReadingListServiceInMemoryImpl;
 import pro._21it.readlater.readinglist.dto.ReadingItemResponse;
 import pro._21it.readlater.readinglist.dto.ReadingListResponse;
+import pro._21it.readlater.common.error.ErrorResponse;
 
 final public class ReadingListHandler implements HttpHandler {
     private final Logger logger = LoggerFactory.getLogger(ReadingListHandler.class);
@@ -95,6 +96,14 @@ final public class ReadingListHandler implements HttpHandler {
             .toList();
 
         if (pathSegments.isEmpty()) {
+            String jsonBody = JSON_MAPPER.writeValueAsString(
+                    new ErrorResponse(
+                        "NOT_ALLOWED",
+                        "not allowed empty witout id",
+                        List.of()
+                    )
+            );
+            writeResponse(exchange, 400, jsonBody);
             throw new IllegalArgumentException("The path is empty");
         }
 
@@ -102,6 +111,14 @@ final public class ReadingListHandler implements HttpHandler {
         try {
             id = Long.parseLong(lastSegment);
         } catch (NumberFormatException e) {
+            String jsonBody = JSON_MAPPER.writeValueAsString(
+                    new ErrorResponse(
+                        "NOT_NUMBER",
+                        "should be a nubmer",
+                        List.of()
+                    )
+            );
+            writeResponse(exchange, 400, jsonBody);
             throw new IllegalArgumentException("id must be a number");
         }
 
