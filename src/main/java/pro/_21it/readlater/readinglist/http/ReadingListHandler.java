@@ -106,9 +106,13 @@ final public class ReadingListHandler implements HttpHandler {
 
         logger.info("Processing ID is {}", id);
         ReadingItemResponse response = service.findById(id);
-        String jsonBody = JSON_MAPPER.writeValueAsString(response);
-
-        writeResponse(exchange, 200, jsonBody);
+        if (response == null) {
+            String jsonBody = JSON_MAPPER.writeValueAsString(new NotFoundResponse("Item with " + id + " is not found"));
+            writeResponse(exchange, 404, jsonBody);
+        } else {
+            String jsonBody = JSON_MAPPER.writeValueAsString(response);
+            writeResponse(exchange, 200, jsonBody);
+        }
     }
 
     private void handleCreateReadingList(HttpExchange exchange) throws IOException {

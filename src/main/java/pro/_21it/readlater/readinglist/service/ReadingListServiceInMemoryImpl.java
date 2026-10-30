@@ -23,6 +23,7 @@ public class ReadingListServiceInMemoryImpl implements ReadingListService {
     public ReadingItemResponse findById(long id) {
         logger.debug("Trying to find an item with ID: {}", id);
         ReadingListItem readingListItem = repository.findById(id);
+        if (readingListItem == null) return null;
         ReadingItemResponse readingItemResponse = mapper.toResponse(readingListItem);
         return readingItemResponse;
     }
