@@ -30,12 +30,22 @@ final public class ReadingListHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-       logger.info("{} {}", exchange.getRequestMethod(), exchange.getRequestURI().getPath());
+        long startedAt = System.nanoTime();
+
         try {
             route(exchange);
         } catch (IllegalArgumentException e) {
             logger.warn("Bad request {}", e.getMessage(), e);
         }
+
+        long tookMs = (System.nanoTime() - startedAt) / 1_000_000;
+
+        logger.info(
+                "method={}, path={}, tookMs={}", 
+                exchange.getRequestMethod(), 
+                exchange.getRequestURI().getPath(), 
+                tookMs
+        );
     }
 
     private void route(HttpExchange exchange) throws IOException {
