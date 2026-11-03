@@ -22,6 +22,7 @@ import pro._21it.readlater.readinglist.service.ReadingListServiceInMemoryImpl;
 import pro._21it.readlater.readinglist.dto.ReadingItemResponse;
 import pro._21it.readlater.readinglist.dto.ReadingListResponse;
 import pro._21it.readlater.common.error.ErrorResponse;
+import pro._21it.readlater.common.error.ErrorResponses;
 
 final public class ReadingListHandler implements HttpHandler {
     private final Logger logger = LoggerFactory.getLogger(ReadingListHandler.class);
@@ -31,9 +32,10 @@ final public class ReadingListHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         long startedAt = System.nanoTime();
+        int status = 0;
 
         try {
-            route(exchange);
+            status = route(exchange);
         } catch (IllegalArgumentException e) {
             logger.warn("Bad request {}", e.getMessage(), e);
         }
@@ -41,58 +43,50 @@ final public class ReadingListHandler implements HttpHandler {
         long tookMs = (System.nanoTime() - startedAt) / 1_000_000;
 
         logger.info(
-                "method={}, path={}, tookMs={}", 
+                "method={}, path={}, status={} tookMs={}", 
                 exchange.getRequestMethod(), 
                 exchange.getRequestURI().getPath(), 
+                status,
                 tookMs
         );
     }
 
-    private void route(HttpExchange exchange) throws IOException {
+    private int route(HttpExchange exchange) throws IOException {
          // 1) Достаём данные, по которым будем маршрутизировать
         String method = exchange.getRequestMethod();
-        String path = exchange.getRequestURI().getPath();
+        String path = normalizedPath(exchange.getRequestURI().getPath());
         
         // 2) Сначала самые точные совпадения
         if ("GET".equals(method) && "/health".equals(path)) {
-            handleHealth(exchange);
-            return;
+            return HealthHandler.handleRequest(exchange);
         }
 
         if ("GET".equals(method) && "/api/v1/reading-list".equals(path)) {
-            handleList(exchange);
-            return;
+            return handleList(exchange);
         }
 
         // 3) Потом более общий маршрут с переменным сегментом
         if ("GET".equals(method) && path.startsWith("/api/v1/reading-list/")) {
-            handleGetByIdRoute(exchange);
-            return;
+            return handleGetByIdRoute(exchange);
         }
 
         // 4) Проверка пост маршрута
         if ("POST".equals(method) && path.startsWith("/api/v1/reading-list")) {
-            handleCreateReadingList(exchange);
-            return;
+            return handleCreateReadingList(exchange);
         }
 
         // 5) Ветка по умолчанию: ничего не подошло
-        sendNotFound(exchange);
+        HttpJsonSender.sendJson(exchange, 404, ErrorResponses.routeNotFound(path));
+        return 404;
     }
 
-    private void handleHealth(HttpExchange exchange) throws IOException {
-        HealthResponse response = new HealthResponse("UP", "readlater-starter");
-        String jsonBody = JSON_MAPPER.writeValueAsString(response);
-        writeResponse(exchange, 200, jsonBody);
-    }
-
-    private void handleList(HttpExchange exchange) throws IOException {
+    private int handleList(HttpExchange exchange) throws IOException {
         ReadingListResponse response = service.findAll();
-        String jsonBody = JSON_MAPPER.writeValueAsString(response);
-        writeResponse(exchange, 200, jsonBody);
+        HttpJsonSender.sendJson(exchange, 200, response);
+        return 200;
     }
 
-    private void handleGetByIdRoute(HttpExchange exchange) throws IOException {
+    private int handleGetByIdRoute(HttpExchange exchange) throws IOException {
         URI uri = exchange.getRequestURI();
         Map<String, String> queryParams = parseQuery(uri.getRawQuery());
         String status = queryParams.get("status");
@@ -106,14 +100,13 @@ final public class ReadingListHandler implements HttpHandler {
             .toList();
 
         if (pathSegments.isEmpty()) {
-            String jsonBody = JSON_MAPPER.writeValueAsString(
+            ErrorResponse response = 
                     new ErrorResponse(
                         "NOT_ALLOWED",
                         "not allowed empty witout id",
                         List.of()
-                    )
-            );
-            writeResponse(exchange, 400, jsonBody);
+                    );
+            HttpJsonSender.sendJson(exchange, 400, response);
             throw new IllegalArgumentException("The path is empty");
         }
 
@@ -121,44 +114,44 @@ final public class ReadingListHandler implements HttpHandler {
         try {
             id = Long.parseLong(lastSegment);
         } catch (NumberFormatException e) {
-            String jsonBody = JSON_MAPPER.writeValueAsString(
+            ErrorResponse response = 
                     new ErrorResponse(
                         "NOT_NUMBER",
                         "should be a nubmer",
                         List.of()
-                    )
-            );
-            writeResponse(exchange, 400, jsonBody);
+                    );
+            HttpJsonSender.sendJson(exchange, 400, response);
             throw new IllegalArgumentException("id must be a number");
         }
 
         logger.info("Processing ID is {}", id);
         ReadingItemResponse response = service.findById(id);
         if (response == null) {
-            String jsonBody = JSON_MAPPER.writeValueAsString(new NotFoundResponse("Item with " + id + " is not found"));
-            writeResponse(exchange, 404, jsonBody);
+            NotFoundResponse errorResponse = new NotFoundResponse("Item with " + id + " is not found");
+            HttpJsonSender.sendJson(exchange, 404, errorResponse);
+            return 404;
         } else {
-            String jsonBody = JSON_MAPPER.writeValueAsString(response);
-            writeResponse(exchange, 200, jsonBody);
+            HttpJsonSender.sendJson(exchange, 200, response);
+            return 200;
         }
     }
 
-    private void handleCreateReadingList(HttpExchange exchange) throws IOException {
+    private int handleCreateReadingList(HttpExchange exchange) throws IOException {
         requireJsonContentType(exchange);
-        String body = readBody(exchange);
+        String body = HttpBodyReader.readBody(exchange);
         if (body.isBlank()) {
             throw new IllegalArgumentException("The body is mandatory");
         }
         CreateReadingItemRequest request = ProviderJsonReader.read(body, CreateReadingItemRequest.class);
         CreatedResponse response = new CreatedResponse(request.toString());
-        String jsonBody = JSON_MAPPER.writeValueAsString(response);
-        writeResponse(exchange, 201, jsonBody);
+        HttpJsonSender.sendJson(exchange, 201, response);
+        return 201;
     }
 
-    private void sendNotFound(HttpExchange exchange) throws IOException {
+    private int sendNotFound(HttpExchange exchange) throws IOException {
         NotFoundResponse response = new NotFoundResponse("The path is not found");
-        String jsonBody = JSON_MAPPER.writeValueAsString(response);
-        writeResponse(exchange, 404, jsonBody);
+        HttpJsonSender.sendJson(exchange, 404, response);
+        return 404;
     }
 
     private String decode(String value) {
@@ -194,26 +187,8 @@ final public class ReadingListHandler implements HttpHandler {
         }
     }
 
-    private String readBody(HttpExchange exchange) throws IOException {
-        try (InputStream stream = exchange.getRequestBody()) {
-            byte[] bytes = stream.readAllBytes();
-            return new String(bytes, StandardCharsets.UTF_8);
-        }
+    private String normalizedPath(String path) {
+        return (path.endsWith("/") && path.length() > 1) ? path.substring(0, path.length() - 1) : path;
     }
 
-    private void writeResponse(HttpExchange exchange, int status, String body) throws IOException {
-        byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
-
-        // Явно указываем текстовый ответ в UTF-8, чтобы клиент корректно интерпретировал тело.
-        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
-
-        // Перед отправкой тела нужно сначала объявить статус и длину ответа.
-        exchange.sendResponseHeaders(status, bytes.length);
-
-        // Response body обязательно закрываем через try-with-resources.
-        // Это гарантирует, что ответ будет корректно завершён и ресурсы освободятся.
-        try (OutputStream outputStream = exchange.getResponseBody()) {
-            outputStream.write(bytes);
-        }
-    }
 }
