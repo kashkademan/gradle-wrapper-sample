@@ -4,13 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.net.http.HttpClient;
-import java.net.http.HttpResponse;
-import java.net.http.HttpTimeoutException;
-import java.io.IOException;
 import java.time.Duration;
-import java.util.Arrays;
-
-import pro._21it.readlater.dto.provider.*;
 
 public class ReadLaterApplication {
     private final static String BASE_URL = "https://openlibrary.org";
