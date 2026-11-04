@@ -2,7 +2,6 @@ package pro._21it.readlater.readinglist.http;
 
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.net.URI;
 import java.util.List;
 import java.util.Arrays;

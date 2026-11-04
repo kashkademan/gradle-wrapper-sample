@@ -4,10 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
-import tools.jackson.databind.json.JsonMapper;
 import pro._21it.readlater.config.AppConfig;
 import pro._21it.readlater.app.server.LocalApiServer;
-import pro._21it.readlater.ProviderJsonReader;
 import pro._21it.readlater.readinglist.http.ReadingListHandler;
 import pro._21it.readlater.readinglist.service.ReadingListService;
 import pro._21it.readlater.readinglist.service.ReadingListServiceInMemoryImpl;
@@ -15,9 +13,8 @@ import pro._21it.readlater.readinglist.service.ReadingListServiceInMemoryImpl;
 public class ReadLaterRunner {
     private final AppConfig config;
     private final Logger logger = LoggerFactory.getLogger(ReadLaterRunner.class);
-    private final JsonMapper jsonMapper = ProviderJsonReader.getMapper();
     private final ReadingListService service = new ReadingListServiceInMemoryImpl();
-    private final HttpHandler readingListHandler = new ReadingListHandler(jsonMapper, service);
+    private final HttpHandler readingListHandler = new ReadingListHandler(service);
 
     public ReadLaterRunner(AppConfig config) {
         this.config = config;
