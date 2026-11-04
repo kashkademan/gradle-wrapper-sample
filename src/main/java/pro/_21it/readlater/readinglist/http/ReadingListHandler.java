@@ -26,8 +26,13 @@ import pro._21it.readlater.common.error.ErrorResponses;
 
 final public class ReadingListHandler implements HttpHandler {
     private final Logger logger = LoggerFactory.getLogger(ReadingListHandler.class);
-    private final JsonMapper JSON_MAPPER = ProviderJsonReader.getMapper();
-    private final ReadingListService service = new ReadingListServiceInMemoryImpl();
+    private final JsonMapper jsonMapper;
+    private final ReadingListService service;
+
+    public ReadingListHandler(JsonMapper jsonMapper, ReadingListService service) {
+        this.jsonMapper = jsonMapper;
+        this.service = service;
+    }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -62,7 +67,7 @@ final public class ReadingListHandler implements HttpHandler {
         }
 
         if ("GET".equals(method) && "/api/v1/reading-list".equals(path)) {
-            return handleList(exchange);
+            return ListHandler.handleRequest(exchange, service);
         }
 
         // 3) Потом более общий маршрут с переменным сегментом
@@ -78,12 +83,6 @@ final public class ReadingListHandler implements HttpHandler {
         // 5) Ветка по умолчанию: ничего не подошло
         HttpJsonSender.sendJson(exchange, 404, ErrorResponses.routeNotFound(path));
         return 404;
-    }
-
-    private int handleList(HttpExchange exchange) throws IOException {
-        ReadingListResponse response = service.findAll();
-        HttpJsonSender.sendJson(exchange, 200, response);
-        return 200;
     }
 
     private int handleGetByIdRoute(HttpExchange exchange) throws IOException {

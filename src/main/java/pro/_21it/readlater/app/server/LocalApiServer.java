@@ -3,6 +3,7 @@ package pro._21it.readlater.app.server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import pro._21it.readlater.config.ServerConfig;
@@ -11,14 +12,14 @@ import pro._21it.readlater.readinglist.http.ReadingListHandler;
 public class LocalApiServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalApiServer.class);
 
-    public HttpServer start(ServerConfig serverConfig) throws IOException {
+    public HttpServer start(ServerConfig serverConfig, HttpHandler readingListHandler) throws IOException {
         InetSocketAddress address = new InetSocketAddress(serverConfig.host(), serverConfig.port());
 
         HttpServer server = HttpServer.create(address, 0);
         server.start();
 
         // Регистрируем endpoint /health и прокидываем config в обработчик
-        server.createContext("/", new ReadingListHandler());
+        server.createContext("/", readingListHandler);
 
         LOGGER.info("Local API started: http://{}:{}", serverConfig.host(), serverConfig.port());
         LOGGER.info("Press Ctrl+C to stop the server.");
