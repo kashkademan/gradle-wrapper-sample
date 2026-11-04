@@ -7,12 +7,15 @@ import pro._21it.readlater.readinglist.domain.ReadingListItem;
 import pro._21it.readlater.readinglist.dto.ReadingItemResponse;
 import pro._21it.readlater.readinglist.dto.ReadingListResponse;
 import pro._21it.readlater.readinglist.repository.ReadingListRepository;
-import pro._21it.readlater.readinglist.repository.InMemoryReadingListRepository;
 
 public class ReadingListServiceInMemoryImpl implements ReadingListService {
-    private final ReadingListRepository repository = new InMemoryReadingListRepository();
+    private final ReadingListRepository repository;
     private final Logger logger = LoggerFactory.getLogger(ReadingListServiceInMemoryImpl.class);
     private final ReadingListMapper mapper = new ReadingListMapper();
+
+    public ReadingListServiceInMemoryImpl(ReadingListRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
     public ReadingListResponse findAll() {
@@ -34,4 +37,5 @@ public class ReadingListServiceInMemoryImpl implements ReadingListService {
 
         return readingItemResponse;
     }
+
 }

@@ -9,11 +9,14 @@ import pro._21it.readlater.app.server.LocalApiServer;
 import pro._21it.readlater.readinglist.http.ReadingListHandler;
 import pro._21it.readlater.readinglist.service.ReadingListService;
 import pro._21it.readlater.readinglist.service.ReadingListServiceInMemoryImpl;
+import pro._21it.readlater.readinglist.repository.ReadingListRepository;
+import pro._21it.readlater.readinglist.repository.InMemoryReadingListRepository;
 
 public class ReadLaterRunner {
     private final AppConfig config;
     private final Logger logger = LoggerFactory.getLogger(ReadLaterRunner.class);
-    private final ReadingListService service = new ReadingListServiceInMemoryImpl();
+    private final ReadingListRepository repository = new InMemoryReadingListRepository();
+    private final ReadingListService service = new ReadingListServiceInMemoryImpl(repository);
     private final HttpHandler readingListHandler = new ReadingListHandler(service);
 
     public ReadLaterRunner(AppConfig config) {
