@@ -2,14 +2,70 @@ package pro._21it.readlater.readinglist.http;
 
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.net.URI;
+import java.util.List;
+import java.util.Arrays;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import pro._21it.readlater.readinglist.service.ReadingListService;
+import pro._21it.readlater.readinglist.dto.ReadingItemResponse;
+import pro._21it.readlater.common.error.ErrorResponse;
 
 public final class ByIdHandler {
+    private final static Logger logger = LoggerFactory.getLogger(ReadingListHandler.class);
 
     private ByIdHandler() {
     }
 
-    public static String handleReqeust(HttpExchange exchange) throws IOException {
-        return "";
-    }
+    public static int handleRequest(HttpExchange exchange, ReadingListService service) throws IOException {
+        URI uri = exchange.getRequestURI();
+        Map<String, String> queryParams = Helper.parseQuery(uri.getRawQuery());
+        String status = queryParams.get("status");
+        String title = queryParams.get("title");
 
+        String path = exchange.getRequestURI().getPath();
+        long id = 0L;
+
+        List<String> pathSegments = Arrays.stream(path.split("/"))
+            .filter(s -> !s.isBlank())
+            .toList();
+
+        if (pathSegments.isEmpty()) {
+            ErrorResponse response = 
+                    new ErrorResponse(
+                        "NOT_ALLOWED",
+                        "not allowed empty witout id",
+                        List.of()
+                    );
+            HttpJsonSender.sendJson(exchange, 400, response);
+            throw new IllegalArgumentException("The path is empty");
+        }
+
+        String lastSegment = pathSegments.get(pathSegments.size() - 1);
+        try {
+            id = Long.parseLong(lastSegment);
+        } catch (NumberFormatException e) {
+            ErrorResponse response = 
+                    new ErrorResponse(
+                        "NOT_NUMBER",
+                        "should be a nubmer",
+                        List.of()
+                    );
+            HttpJsonSender.sendJson(exchange, 400, response);
+            throw new IllegalArgumentException("id must be a number");
+        }
+
+        logger.info("Processing ID is {}", id);
+        ReadingItemResponse response = service.findById(id);
+        if (response == null) {
+            NotFoundResponse errorResponse = new NotFoundResponse("Item with " + id + " is not found");
+            HttpJsonSender.sendJson(exchange, 404, errorResponse);
+            return 404;
+        } else {
+            HttpJsonSender.sendJson(exchange, 200, response);
+            return 200;
+        }
+    }
 }

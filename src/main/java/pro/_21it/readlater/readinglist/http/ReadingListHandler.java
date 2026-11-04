@@ -55,7 +55,7 @@ final public class ReadingListHandler implements HttpHandler {
     private int route(HttpExchange exchange) throws IOException {
          // 1) Достаём данные, по которым будем маршрутизировать
         String method = exchange.getRequestMethod();
-        String path = normalizedPath(exchange.getRequestURI().getPath());
+        String path = Helper.normalizedPath(exchange.getRequestURI().getPath());
         
         // 2) Сначала самые точные совпадения
         if ("GET".equals(method) && "/health".equals(path)) {
@@ -68,7 +68,7 @@ final public class ReadingListHandler implements HttpHandler {
 
         // 3) Потом более общий маршрут с переменным сегментом
         if ("GET".equals(method) && path.startsWith("/api/v1/reading-list/")) {
-            return handleGetByIdRoute(exchange);
+            return ByIdHandler.handleRequest(exchange, service);
         }
 
         // 4) Проверка пост маршрута
@@ -81,58 +81,8 @@ final public class ReadingListHandler implements HttpHandler {
         return 404;
     }
 
-    private int handleGetByIdRoute(HttpExchange exchange) throws IOException {
-        URI uri = exchange.getRequestURI();
-        Map<String, String> queryParams = parseQuery(uri.getRawQuery());
-        String status = queryParams.get("status");
-        String title = queryParams.get("title");
-
-        String path = exchange.getRequestURI().getPath();
-        long id = 0L;
-
-        List<String> pathSegments = Arrays.stream(path.split("/"))
-            .filter(s -> !s.isBlank())
-            .toList();
-
-        if (pathSegments.isEmpty()) {
-            ErrorResponse response = 
-                    new ErrorResponse(
-                        "NOT_ALLOWED",
-                        "not allowed empty witout id",
-                        List.of()
-                    );
-            HttpJsonSender.sendJson(exchange, 400, response);
-            throw new IllegalArgumentException("The path is empty");
-        }
-
-        String lastSegment = pathSegments.get(pathSegments.size() - 1);
-        try {
-            id = Long.parseLong(lastSegment);
-        } catch (NumberFormatException e) {
-            ErrorResponse response = 
-                    new ErrorResponse(
-                        "NOT_NUMBER",
-                        "should be a nubmer",
-                        List.of()
-                    );
-            HttpJsonSender.sendJson(exchange, 400, response);
-            throw new IllegalArgumentException("id must be a number");
-        }
-
-        logger.info("Processing ID is {}", id);
-        ReadingItemResponse response = service.findById(id);
-        if (response == null) {
-            NotFoundResponse errorResponse = new NotFoundResponse("Item with " + id + " is not found");
-            HttpJsonSender.sendJson(exchange, 404, errorResponse);
-            return 404;
-        } else {
-            HttpJsonSender.sendJson(exchange, 200, response);
-            return 200;
-        }
-    }
-
     private int handleCreateReadingList(HttpExchange exchange) throws IOException {
-        requireJsonContentType(exchange);
+        Helper.requireJsonContentType(exchange);
         String body = HttpBodyReader.readBody(exchange);
         if (body.isBlank()) {
             throw new IllegalArgumentException("The body is mandatory");
@@ -147,43 +97,6 @@ final public class ReadingListHandler implements HttpHandler {
         NotFoundResponse response = new NotFoundResponse("The path is not found");
         HttpJsonSender.sendJson(exchange, 404, response);
         return 404;
-    }
-
-    private String decode(String value) {
-        return URLDecoder.decode(value, StandardCharsets.UTF_8);
-    }
-
-    private Map<String, String> parseQuery(String query) {
-        Map<String, String> result = new HashMap<>();
-
-        if (query == null || query.isBlank()) return result;
-
-        for (String pair : query.split("&")) {
-            String[] parts = pair.split("=", 2);
-            String key = decode(parts[0]);
-            String value = parts.length == 2 ? decode(parts[1]) : "";
-
-            result.put(key, value);
-        }
-
-        return result;
-    }
-
-    private boolean isJsonContentType(HttpExchange exchange) {
-        String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
-        // null — нормальный вариант для запросов без body
-        return contentType != null && contentType.startsWith("application/json");
-    }
-
-    private void requireJsonContentType(HttpExchange exchange) {
-        // Проверка нужна только там, где реально ожидается JSON-тело
-        if (!isJsonContentType(exchange)) {
-            throw new IllegalArgumentException("Content-Type должен быть application/json");
-        }
-    }
-
-    private String normalizedPath(String path) {
-        return (path.endsWith("/") && path.length() > 1) ? path.substring(0, path.length() - 1) : path;
     }
 
 }
