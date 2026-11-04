@@ -3,8 +3,6 @@ package pro._21it.readlater.readinglist.http;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.net.URLDecoder;
 import java.net.URI;
@@ -18,9 +16,7 @@ import org.slf4j.LoggerFactory;
 import pro._21it.readlater.ProviderJsonReader;
 import pro._21it.readlater.dto.CreateReadingItemRequest;
 import pro._21it.readlater.readinglist.service.ReadingListService;
-import pro._21it.readlater.readinglist.service.ReadingListServiceInMemoryImpl;
 import pro._21it.readlater.readinglist.dto.ReadingItemResponse;
-import pro._21it.readlater.readinglist.dto.ReadingListResponse;
 import pro._21it.readlater.common.error.ErrorResponse;
 import pro._21it.readlater.common.error.ErrorResponses;
 

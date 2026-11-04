@@ -8,7 +8,6 @@ import pro._21it.readlater.readinglist.dto.ReadingItemResponse;
 import pro._21it.readlater.readinglist.dto.ReadingListResponse;
 import pro._21it.readlater.readinglist.repository.ReadingListRepository;
 import pro._21it.readlater.readinglist.repository.InMemoryReadingListRepository;
-import pro._21it.readlater.readinglist.service.ReadingListMapper;
 
 public class ReadingListServiceInMemoryImpl implements ReadingListService {
     private final ReadingListRepository repository = new InMemoryReadingListRepository();
