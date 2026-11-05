@@ -2,7 +2,7 @@ package pro._21it.readlater.readinglist.http;
 
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
-import pro._21it.readlater.dto.CreateReadingItemRequest;
+import pro._21it.readlater.readinglist.dto.CreateReadingItemRequest;
 import pro._21it.readlater.readinglist.dto.ReadingItemResponse;
 import pro._21it.readlater.ProviderJsonReader;
 import pro._21it.readlater.readinglist.service.ReadingListService;

@@ -30,7 +30,7 @@ public final class ReadingListRouter {
         }
 
         // 4) Проверка пост маршрута
-        if ("POST".equals(method) && path.startsWith("/api/v1/reading-list")) {
+        if ("POST".equals(method) && "/api/v1/reading-list".equals(path)) {
             return CreateReadingListHandler.handleRequest(exchange, service);
         }
 

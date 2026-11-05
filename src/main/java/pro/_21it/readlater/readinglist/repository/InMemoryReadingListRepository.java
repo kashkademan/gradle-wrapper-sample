@@ -42,9 +42,15 @@ public class InMemoryReadingListRepository implements ReadingListRepository {
     }
 
     @Override
-    public ReadingListItem save(ReadingListItem itemToAdd) {
-        storage.put(itemToAdd.getId(), itemToAdd);
-        return findById(itemToAdd.getId());
+    public ReadingListItem save(ReadingListItem itemToCreate) {
+        storage.put(itemToCreate.getId(), itemToCreate);
+        return findById(itemToCreate.getId());
+    }
+
+    @Override
+    public ReadingListItem update(ReadingListItem itemToUpdate) {
+        storage.put(itemToUpdate.getId(), itemToUpdate);
+        return findById(itemToUpdate.getId());
     }
 
     private void putSample(String title, String author, ReadingStatus status, String externalId, String comment) {

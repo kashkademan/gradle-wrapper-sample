@@ -13,5 +13,7 @@ public interface ReadingListRepository {
 
     boolean existsByExternalId(String externalId);
 
-    public ReadingListItem save(ReadingListItem itemToAdd); 
+    public ReadingListItem save(ReadingListItem itemToCreate); 
+
+    public ReadingListItem update(ReadingListItem itemToUpdate);
 }

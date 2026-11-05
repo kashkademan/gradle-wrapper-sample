@@ -7,7 +7,8 @@ import pro._21it.readlater.readinglist.domain.ReadingListItem;
 import pro._21it.readlater.readinglist.domain.ReadingStatus;
 import pro._21it.readlater.readinglist.dto.ReadingItemResponse;
 import pro._21it.readlater.readinglist.dto.ReadingListResponse;
-import pro._21it.readlater.dto.CreateReadingItemRequest;
+import pro._21it.readlater.readinglist.dto.CreateReadingItemRequest;
+import pro._21it.readlater.readinglist.dto.UpdateReadingItemRequest;
 import pro._21it.readlater.readinglist.repository.ReadingListRepository;
 
 public class ReadingListServiceInMemoryImpl implements ReadingListService {
@@ -62,5 +63,14 @@ public class ReadingListServiceInMemoryImpl implements ReadingListService {
         ReadingItemResponse readingItemResponse = mapper.toResponse(createdItem);
 
         return readingItemResponse;
+    }
+
+    @Override
+    public ReadingItemResponse updateReadingListItem(long id, UpdateReadingItemRequest request) {
+        ReadingListItem itemToUpdate = mapper.toDomain(id, request);
+
+        ReadingListItem updatedItem = repository.update(itemToUpdate);
+        ReadingItemResponse response = mapper.toResponse(updatedItem);
+        return response;
     }
 }

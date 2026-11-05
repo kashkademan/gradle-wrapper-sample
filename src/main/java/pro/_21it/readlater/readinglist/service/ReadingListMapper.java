@@ -23,6 +23,17 @@ public class ReadingListMapper {
         );
     }
 
+    public ReadingListItem toDomain(long id, UpdateReadingItemRequest req) {
+        return new ReadingListItem(
+                id,
+                req.title(),
+                req.author(),
+                req.status(),
+                req.externalId(),
+                req.comment()
+        );
+    }
+
     public void applyUpdate(ReadingListItem item, UpdateReadingItemRequest req) {
         // Полное обновление делегируем каноническому domain API
         item.update(
