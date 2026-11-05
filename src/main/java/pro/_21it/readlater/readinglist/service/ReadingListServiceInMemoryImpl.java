@@ -4,8 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
 import pro._21it.readlater.readinglist.domain.ReadingListItem;
+import pro._21it.readlater.readinglist.domain.ReadingStatus;
 import pro._21it.readlater.readinglist.dto.ReadingItemResponse;
 import pro._21it.readlater.readinglist.dto.ReadingListResponse;
+import pro._21it.readlater.dto.CreateReadingItemRequest;
 import pro._21it.readlater.readinglist.repository.ReadingListRepository;
 
 public class ReadingListServiceInMemoryImpl implements ReadingListService {
@@ -38,4 +40,26 @@ public class ReadingListServiceInMemoryImpl implements ReadingListService {
         return readingItemResponse;
     }
 
+    public ReadingItemResponse createReadingListItem(CreateReadingItemRequest request) {
+        if (request.externalId() != null && repository.existsByExternalId(request.externalId())) {
+            // В учебном проекте — простое исключение, позже можно заменить на доменное/HTTP-ошибку
+            throw new IllegalStateException("externalId already exists: " + request.externalId());
+        }
+
+        long id = repository.nextId();
+
+        ReadingListItem itemToSave = new ReadingListItem(
+                id,
+                request.title(),
+                request.author(),
+                ReadingStatus.PLANNED,
+                request.externalId(),
+                request.comment()
+        );
+
+        ReadingListItem createdItem = repository.save(itemToSave);
+        ReadingItemResponse readingItemResponse = mapper.toResponse(createdItem);
+
+        return readingItemResponse;
+    }
 }

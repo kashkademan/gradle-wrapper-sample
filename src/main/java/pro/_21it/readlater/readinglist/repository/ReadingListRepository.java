@@ -8,4 +8,10 @@ public interface ReadingListRepository {
     List<ReadingListItem> findAll();
 
     ReadingListItem findById(long id);
+
+    long nextId();
+
+    boolean existsByExternalId(String externalId);
+
+    public ReadingListItem save(ReadingListItem itemToAdd); 
 }
