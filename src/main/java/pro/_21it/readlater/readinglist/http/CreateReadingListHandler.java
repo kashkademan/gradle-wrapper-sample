@@ -3,6 +3,7 @@ package pro._21it.readlater.readinglist.http;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 import pro._21it.readlater.dto.CreateReadingItemRequest;
+import pro._21it.readlater.readinglist.dto.ReadingItemResponse;
 import pro._21it.readlater.ProviderJsonReader;
 import pro._21it.readlater.readinglist.service.ReadingListService;
 
@@ -18,7 +19,7 @@ public final class CreateReadingListHandler {
             throw new IllegalArgumentException("The body is mandatory");
         }
         CreateReadingItemRequest request = ProviderJsonReader.read(body, CreateReadingItemRequest.class);
-        String response = "";        
+        ReadingItemResponse response = service.createReadingListItem(request);
         HttpJsonSender.sendJson(exchange, 201, response);
         return 201;
     }

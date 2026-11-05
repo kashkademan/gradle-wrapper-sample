@@ -40,6 +40,7 @@ public class ReadingListServiceInMemoryImpl implements ReadingListService {
         return readingItemResponse;
     }
 
+    @Override
     public ReadingItemResponse createReadingListItem(CreateReadingItemRequest request) {
         if (request.externalId() != null && repository.existsByExternalId(request.externalId())) {
             // В учебном проекте — простое исключение, позже можно заменить на доменное/HTTP-ошибку
