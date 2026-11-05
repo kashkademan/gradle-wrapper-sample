@@ -19,6 +19,7 @@ public class InMemoryReadingListRepository implements ReadingListRepository {
     // Стартовые данные нужны только для демонстрации read-only эндпоинтов.
         putSample("Clean Code", "Robert C. Martin", ReadingStatus.PLANNED, "OL12345M", "comment 1");
         putSample("Effective Java", "Joshua Bloch", ReadingStatus.IN_PROGRESS, "OL67890M", "comment 2");
+        logger.info("Collection im mamory was created with {} items", storage.size());
     }
 
     @Override

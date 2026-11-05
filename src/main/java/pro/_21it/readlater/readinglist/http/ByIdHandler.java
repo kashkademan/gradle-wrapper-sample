@@ -20,8 +20,6 @@ public final class ByIdHandler {
     public static int handleRequest(HttpExchange exchange, ReadingListService service) throws IOException {
         URI uri = exchange.getRequestURI();
         Map<String, String> queryParams = Helper.parseQuery(uri.getRawQuery());
-        String status = queryParams.get("status");
-        String title = queryParams.get("title");
 
         String path = uri.getPath();
         long id = 0L;

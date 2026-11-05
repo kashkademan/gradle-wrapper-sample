@@ -20,6 +20,7 @@ public class CatalogService {
 
         // Здесь реальный вызов клиента и обработка результата
         var items = client.search(query);
+        log.info("items found {}", items);
 
         // Симметричное сообщение "закончили" помогает видеть длительность/границы операции в потоке логов
         log.info("Catalog search finished, query={}", query);

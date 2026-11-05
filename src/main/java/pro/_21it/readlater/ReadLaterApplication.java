@@ -11,11 +11,6 @@ public class ReadLaterApplication {
     private final static Integer QUERY_LIMIT = 2;
     private final static String QUERY = "clean code";
     private final static String EXTERNAL_ID = "OL12345M";
-    private final static HttpClient client = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(9))
-            .build();
-    private final static ProviderJsonReader jsonReader = new ProviderJsonReader();
-    private static CommandRouter commandRouter;
 
     public static void main(String[] args) {
         ConsoleBanner.print();
@@ -31,23 +26,6 @@ public class ReadLaterApplication {
 
         logger.info("Search URI: " + searchUri);
         logger.info("Details URI: " + detailsUri);
-
-        // try {
-        //     HttpResponse<String> response = client.send(
-        //             NetworkRequest.buildGetRequest(searchUri),
-        //             HttpResponse.BodyHandlers.ofString());
-        //     int status = response.statusCode();
-        //     logger.info(is2xx(status) ? "SUCCESS: " + status : "ERROR: " + status);
-        //     ProviderSearchResponseDto responseDto = jsonReader.read(response.body(), ProviderSearchResponseDto.class);
-        //     logger.info("response dto: " + responseDto);
-        // } catch (HttpTimeoutException e) {
-        //     logger.error("REQUEST_TIMEOUT");
-        // } catch (IOException e) {
-        //     logger.error("IO_ERROR");
-        // } catch (InterruptedException e) {
-        //     Thread.currentThread().interrupt();
-        //     logger.error("INTERRUPTED");
-        // }
     }
 
     public static boolean is2xx(int status) {
