@@ -3,8 +3,6 @@ package pro._21it.readlater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.time.Duration;
 
 public class ReadLaterApplication {
     private final static String BASE_URL = "https://openlibrary.org";
