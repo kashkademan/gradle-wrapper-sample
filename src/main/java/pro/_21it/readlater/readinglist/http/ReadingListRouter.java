@@ -34,6 +34,11 @@ public final class ReadingListRouter {
             return CreateReadingListHandler.handleRequest(exchange, service);
         }
 
+        // 4) Проверка пут маршрута
+        if ("PUT".equals(method) && path.startsWith("/api/v1/reading-list/")) {
+            return PutReadingListHandler.handleRequest(exchange, service);
+        }
+
         // 5) Ветка по умолчанию: ничего не подошло
         HttpJsonSender.sendJson(exchange, 404, ErrorResponses.routeNotFound(path));
         return 404;

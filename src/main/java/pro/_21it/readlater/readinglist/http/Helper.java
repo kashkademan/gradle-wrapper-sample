@@ -5,12 +5,14 @@ import java.nio.charset.StandardCharsets;
 import java.net.URLDecoder;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Arrays;
+import pro._21it.readlater.common.error.ErrorResponse;
 
 public final class Helper {
 
     public Helper() {
     }
-
 
     public static String decode(String value) {
         return URLDecoder.decode(value, StandardCharsets.UTF_8);
@@ -47,5 +49,26 @@ public final class Helper {
 
     public static String normalizedPath(String path) {
         return (path.endsWith("/") && path.length() > 1) ? path.substring(0, path.length() - 1) : path;
+    }
+
+    public static long validateAndReturnId(String path) {
+        long id = 0L;
+
+        List<String> pathSegments = Arrays.stream(path.split("/"))
+            .filter(s -> !s.isBlank())
+            .toList();
+
+        if (pathSegments.isEmpty()) {
+            throw new IllegalArgumentException("The path is empty");
+        }
+
+        String lastSegment = pathSegments.get(pathSegments.size() - 1);
+        try {
+            id = Long.parseLong(lastSegment);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("id must be a number");
+        }
+
+        return id;
     }
 }

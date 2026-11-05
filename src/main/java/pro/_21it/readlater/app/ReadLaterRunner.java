@@ -36,6 +36,7 @@ public class ReadLaterRunner {
         logger.debug(command.summary());
         try {
             HttpServer localServer = new LocalApiServer().start(config.server(), readingListHandler);
+            logger.info("Server Hash Code: {}", localServer.hashCode());
         } catch (Exception e) {
             logger.error("The error while statring a server: {}", e.getMessage(), e);
         };

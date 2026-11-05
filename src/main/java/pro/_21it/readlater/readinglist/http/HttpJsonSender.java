@@ -18,6 +18,9 @@ public final class HttpJsonSender {
 
         // Явно указываем текстовый ответ в UTF-8, чтобы клиент корректно интерпретировал тело.
         exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
+        if (status == 201) {
+            exchange.getResponseHeaders().set("Location", "/api/v1/reading-list/" + status);
+        };
 
         // Перед отправкой тела нужно сначала объявить статус и длину ответа.
         exchange.sendResponseHeaders(status, bytes.length);
@@ -27,5 +30,7 @@ public final class HttpJsonSender {
         try (OutputStream outputStream = exchange.getResponseBody()) {
             outputStream.write(bytes);
         }
+
+        exchange.close();
     }
 }
