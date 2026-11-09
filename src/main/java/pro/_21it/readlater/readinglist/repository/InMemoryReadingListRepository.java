@@ -54,6 +54,12 @@ public class InMemoryReadingListRepository implements ReadingListRepository {
         return findById(itemToUpdate.getId());
     }
 
+    @Override
+    public boolean deleteById(long id) {
+        ReadingListItem removed = storage.remove(id);
+        return removed != null;
+    }
+
     private void putSample(String title, String author, ReadingStatus status, String externalId, String comment) {
         long id = nextId();
         ReadingListItem item = new ReadingListItem(id, title, author, status, externalId, comment);

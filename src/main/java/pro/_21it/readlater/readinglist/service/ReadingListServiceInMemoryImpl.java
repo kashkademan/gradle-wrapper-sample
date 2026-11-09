@@ -9,6 +9,7 @@ import pro._21it.readlater.readinglist.dto.ReadingItemResponse;
 import pro._21it.readlater.readinglist.dto.ReadingListResponse;
 import pro._21it.readlater.readinglist.dto.CreateReadingItemRequest;
 import pro._21it.readlater.readinglist.dto.UpdateReadingItemRequest;
+import pro._21it.readlater.readinglist.dto.UpdateStatusRequest;
 import pro._21it.readlater.readinglist.repository.ReadingListRepository;
 
 public class ReadingListServiceInMemoryImpl implements ReadingListService {
@@ -72,5 +73,18 @@ public class ReadingListServiceInMemoryImpl implements ReadingListService {
         ReadingListItem updatedItem = repository.update(itemToUpdate);
         ReadingItemResponse response = mapper.toResponse(updatedItem);
         return response;
+    }
+
+    @Override
+    public ReadingItemResponse patchReadingListItem(long it, UpdateStatusRequest request) {
+        return null;
+    }
+
+    @Override
+    public boolean delete(long id) {
+        boolean deleted = repository.deleteById(id);
+        logger.info("Delete reading list item: id={}, deleted={}", id, deleted);
+
+        return deleted;
     }
 }

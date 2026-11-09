@@ -39,7 +39,17 @@ public final class ReadingListRouter {
             return PutReadingListHandler.handleRequest(exchange, service);
         }
 
-        // 5) Ветка по умолчанию: ничего не подошло
+        // 5) Проверка патч маршрута
+        if ("PATCH".equals(method) && path.startsWith("/api/v1/reading-list/")) {
+            return PatchReadingListHandler.handleRequest(exchange, service);
+        }
+
+        // 6) Проверка делит маршрута
+        if ("DELETE".equals(method) && path.startsWith("/api/v1/reading-list/")) {
+            return DeleteReadingListHandler.handleRequest(exchange, service);
+        }
+
+        // 7) Ветка по умолчанию: ничего не подошло
         HttpJsonSender.sendJson(exchange, 404, ErrorResponses.routeNotFound(path));
         return 404;
     }

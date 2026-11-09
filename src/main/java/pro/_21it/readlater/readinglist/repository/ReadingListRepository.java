@@ -13,7 +13,9 @@ public interface ReadingListRepository {
 
     boolean existsByExternalId(String externalId);
 
-    public ReadingListItem save(ReadingListItem itemToCreate); 
+    ReadingListItem save(ReadingListItem itemToCreate); 
 
-    public ReadingListItem update(ReadingListItem itemToUpdate);
+    ReadingListItem update(ReadingListItem itemToUpdate);
+
+    boolean deleteById(long id);
 }
