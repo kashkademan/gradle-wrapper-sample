@@ -29,9 +29,9 @@ final public class ReadingListHandler implements HttpHandler {
         long tookMs = (System.nanoTime() - startedAt) / 1_000_000;
 
         logger.info(
-                "method={}, path={}, status={} tookMs={}", 
-                exchange.getRequestMethod(), 
-                exchange.getRequestURI().getPath(), 
+                "method={}, path={}, status={} tookMs={}",
+                exchange.getRequestMethod(),
+                exchange.getRequestURI().getPath(),
                 status,
                 tookMs
         );

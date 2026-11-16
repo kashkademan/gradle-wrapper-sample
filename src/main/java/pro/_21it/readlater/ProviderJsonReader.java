@@ -15,7 +15,7 @@ public final class ProviderJsonReader {
         try {
             return mapper.readValue(json, type);
         } catch (JacksonException e) {
-            throw new IllegalStateException("Provider JSON is not compatible with DTO: " + type.getSimpleName(),e);
+            throw new IllegalArgumentException("Malformed JSON", e);
         }
     }
 }

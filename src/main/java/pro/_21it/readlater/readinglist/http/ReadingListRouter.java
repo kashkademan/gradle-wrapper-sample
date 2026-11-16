@@ -14,7 +14,7 @@ public final class ReadingListRouter {
          // 1) Достаём данные, по которым будем маршрутизировать
         String method = exchange.getRequestMethod();
         String path = Helper.normalizedPath(exchange.getRequestURI().getPath());
-        
+
         // 2) Сначала самые точные совпадения
         if ("GET".equals(method) && "/health".equals(path)) {
             return HealthHandler.handleRequest(exchange);
