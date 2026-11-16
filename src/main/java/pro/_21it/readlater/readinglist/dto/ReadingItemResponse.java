@@ -10,7 +10,7 @@ public record ReadingItemResponse(
         // Текущее значение author
         String author,
         // Текущее значение status
-        ReadingStatus status,
+        String status,
         // Может быть null, если внешний id не задан
         String externalId,
         // Может быть null, если комментария нет

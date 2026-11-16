@@ -11,7 +11,7 @@ public final class ReadLaterApplication {
 
     public static void main(String[] args) {
         AppConfig config = AppConfigFactory.from(new PropertiesLoader().load(), System.getenv());
-        
+
         LaunchCommand cmd;
         try {
             cmd = LaunchCommandParser.parse(args);

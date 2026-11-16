@@ -8,7 +8,7 @@ public record UpdateReadingItemRequest(
         // Полная замена author
         String author,
         // Полная замена status (даже если меняем только его — лучше иметь отдельный PATCH DTO)
-        ReadingStatus status,
+        String status,
         // Полная замена externalId (может быть null)
         String externalId,
         // Полная замена comment (может быть null)

@@ -25,14 +25,14 @@ public final class PatchReadingListHandler {
 
     public static int handleRequest(HttpExchange exchange, ReadingListService service) throws IOException {
         String path = exchange.getRequestURI().getPath();
-        
+
         OptionalLong idOpt = tryExtractIdForStatusPatch(path);
         if (idOpt.isEmpty()) {
             exchange.sendResponseHeaders(400, -1);
             exchange.close();
             return 400;
         }
-        
+
         Helper.requireJsonContentType(exchange);
         String body = HttpBodyReader.readBody(exchange);
         if (body.isBlank()) {

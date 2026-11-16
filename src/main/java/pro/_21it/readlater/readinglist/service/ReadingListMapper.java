@@ -1,6 +1,7 @@
 package pro._21it.readlater.readinglist.service;
 
 import pro._21it.readlater.readinglist.domain.ReadingListItem;
+import pro._21it.readlater.readinglist.domain.ReadingStatus;
 import pro._21it.readlater.readinglist.dto.CreateReadingItemRequest;
 import pro._21it.readlater.readinglist.dto.UpdateReadingItemRequest;
 import pro._21it.readlater.readinglist.dto.ReadingItemResponse;
@@ -17,7 +18,7 @@ public class ReadingListMapper {
                 id,
                 req.title(),
                 req.author(),
-                req.status(),
+                ReadingStatus.valueOf(req.status()),
                 req.externalId(),
                 req.comment()
         );
@@ -28,7 +29,7 @@ public class ReadingListMapper {
                 id,
                 req.title(),
                 req.author(),
-                req.status(),
+                ReadingStatus.valueOf(req.status()),
                 req.externalId(),
                 req.comment()
         );
@@ -39,7 +40,7 @@ public class ReadingListMapper {
         item.update(
                 req.title(),
                 req.author(),
-                req.status(),
+                ReadingStatus.valueOf(req.status()),
                 req.externalId(),
                 req.comment()
         );
@@ -48,18 +49,18 @@ public class ReadingListMapper {
     public ReadingItemResponse toResponse(ReadingListItem item) {
         // Явно перечисляем поля: это проще читать и проще проверять на ревью
         return new ReadingItemResponse(
-                item.getId(), 
-                item.getTitle(), 
+                item.getId(),
+                item.getTitle(),
                 item.getAuthor(),
-                item.getStatus(), 
-                item.getExternalId(), 
+                item.getStatus().name(),
+                item.getExternalId(),
                 item.getComment()
         );
     }
 
     public ReadingListResponse toListResponse(List<ReadingListItem> items) {
         var dtos = items.stream().map(this::toResponse).toList();
-        
+
         return new ReadingListResponse(dtos, dtos.size());
     }
 }

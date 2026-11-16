@@ -8,7 +8,7 @@ public record CreateReadingItemRequest(
         // Автор в свободной форме (для учебного проекта достаточно строки)
         String author,
         // Статус чтения в момент создания (например, PLANNED)
-        ReadingStatus status,
+        String status,
         // Внешний идентификатор (может отсутствовать)
         String externalId,
         // Комментарий пользователя (может отсутствовать)
