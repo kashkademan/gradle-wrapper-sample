@@ -6,10 +6,13 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro._21it.readlater.readinglist.service.ReadingListService;
+import pro._21it.readlater.common.error.ErrorResponse;
+import pro._21it.readlater.common.error.ErrorMapper;
 
 final public class ReadingListHandler implements HttpHandler {
     private final Logger logger = LoggerFactory.getLogger(ReadingListHandler.class);
     private final ReadingListService service;
+    private final ErrorMapper errorMapper = new ErrorMapper();
 
     public ReadingListHandler(ReadingListService service) {
         this.service = service;
@@ -22,8 +25,13 @@ final public class ReadingListHandler implements HttpHandler {
 
         try {
             status = ReadingListRouter.route(exchange, service);
-        } catch (IllegalArgumentException e) {
-            logger.warn("Bad request {}", e.getMessage(), e);
+        } catch (Exception ex) {
+            // Подробности — в логах (сюда попадёт stack trace).
+            logger.error("Request failed", ex);
+
+            status = errorMapper.statusFor(ex);
+            ErrorResponse body = errorMapper.bodyFor(ex);
+            HttpJsonSender.sendJson(exchange, status, body);
         }
 
         long tookMs = (System.nanoTime() - startedAt) / 1_000_000;

@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.bundling.Zip
+
 plugins {
     // Компилируем Java-код
     java
@@ -39,4 +41,22 @@ java {
 application {
     // Точка входа приложения
     mainClass = "pro._21it.readlater.app.ReadLaterApplication"
+}
+
+tasks.register<Zip>("packageDist") {
+    // Кладём собранный jar в папку libs внутри архива
+    from(tasks.jar) { into("ligs") }
+
+    // Кладём runtime-зависимости рядом, чтобы запускать через -cp "libs/*"
+    from(configurations.runtimeClasspath) { into("libs") }
+
+    // Добавляем инструкцию по запуску рядом — иначе ZIP превращается в "угадай как"
+    from("README.md")
+
+    // Добавляем smoke-инструмент (Postman collection) как часть артефакта
+    from("postman") { into("postman") }
+
+    // Явно задаём, куда складывать ZIP и как его назвать (чтобы путь был предсказуемым)
+    destinationDirectory.set(layout.buildDirectory.dir("dist"))
+    archiveFileName.set("readlater-starter.zip")
 }

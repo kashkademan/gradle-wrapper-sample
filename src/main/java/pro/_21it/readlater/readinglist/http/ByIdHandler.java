@@ -10,6 +10,7 @@ import java.util.List;
 import pro._21it.readlater.readinglist.service.ReadingListService;
 import pro._21it.readlater.readinglist.dto.ReadingItemResponse;
 import pro._21it.readlater.common.error.ErrorResponse;
+import pro._21it.readlater.common.error.NotFoundException;
 
 public final class ByIdHandler {
     private final static Logger logger = LoggerFactory.getLogger(ReadingListHandler.class);
@@ -28,21 +29,19 @@ public final class ByIdHandler {
         try {
             id = Helper.validateAndReturnId(path);
         } catch (Exception e) {
-            ErrorResponse response = 
+            ErrorResponse response =
                     new ErrorResponse(
                         "NOT_ALLOWED",
                         e.getMessage(),
                         List.of()
                     );
             HttpJsonSender.sendJson(exchange, 400, response);
-        }        
+         }
 
         logger.info("Processing ID is {}", id);
         ReadingItemResponse response = service.findById(id);
         if (response == null) {
-            NotFoundResponse errorResponse = new NotFoundResponse("Item with " + id + " is not found");
-            HttpJsonSender.sendJson(exchange, 404, errorResponse);
-            return 404;
+            throw new NotFoundException("Item with " + id +  " is not found.");
         } else {
             HttpJsonSender.sendJson(exchange, 200, response);
             return 200;

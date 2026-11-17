@@ -1,0 +1,720 @@
+{
+  "info": {
+    "_postman_id": "9b5e6b52-28fd-4d17-8f6d-4f155b5a7d0c",
+    "name": "ReadLater Starter - server mode",
+    "description": "Финальная collection для server-mode.\n\nКаждая папка самодостаточна: её можно запускать отдельно, повторно и в любом порядке, а можно запустить всю коллекцию целиком.\n- 01 Health — доступность сервера.\n- 02 CRUD smoke — полный цикл create → read → update → patch → read → delete → read(404). POST сохраняет itemId и itemStatus в environment, поэтому следующие запросы работают без ручного копирования идентификатора и без правки URL; последний запрос очищает переменные.\n- 03 Negative — 400, 404, 405 и 409. Для 409 папка сама создаёт ресурс, повторяет тот же payload и удаляет ресурс за собой, поэтому от папки 02 не зависит.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 Health",
+      "description": "Быстрая проверка, что server-mode поднят и отвечает на базовый запрос.",
+      "item": [
+        {
+          "name": "GET /health -> 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"GET /health -> 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Самая дешевая проверка доступности: здесь важен сам факт ответа, а не состояние доменной модели."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 CRUD smoke",
+      "description": "Запускайте папку по порядку (Run folder). Она проходит полный CRUD от создания до удаления и убирает за собой ресурс и переменные, поэтому её можно запускать повторно.",
+      "item": [
+        {
+          "name": "GET /api/v1/reading-list -> 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"GET /api/v1/reading-list -> 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reading-list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reading-list"
+              ]
+            },
+            "description": "Читаем текущую коллекцию через переменную baseUrl, чтобы коллекция оставалась переносимой между окружениями."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/reading-list -> 201 + save itemId",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Для POST допускаем 200/201: в разных реализациях создание может возвращать либо статус создания, либо обычный успешный ответ.",
+                  "pm.test(\"POST /api/v1/reading-list создал ресурс\", function () {",
+                  "  pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "// Читаем JSON один раз и дальше работаем только с ним, чтобы не дублировать parsing ответа.",
+                  "const json = pm.response.json();",
+                  "",
+                  "// id нужен для всех следующих запросов CRUD, поэтому сохраняем его в environment.",
+                  "pm.test(\"Ответ содержит id\", function () {",
+                  "  pm.expect(json.id).to.not.be.undefined;",
+                  "});",
+                  "",
+                  "pm.environment.set(\"itemId\", String(json.id));",
+                  "",
+                  "// Если сервис возвращает статус созданного элемента, сохраняем и его: так PUT/PATCH не зависят от хардкода enum.",
+                  "if (json.status) {",
+                  "  pm.environment.set(\"itemStatus\", String(json.status));",
+                  "}",
+                  "",
+                  "// Финальная проверка помогает быстро заметить ситуацию, когда переменная не записалась.",
+                  "pm.test(\"itemId сохранён в environment\", function () {",
+                  "  pm.expect(pm.environment.get(\"itemId\")).to.eql(String(json.id));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"ReadLater smoke item\",\n  \"sourceUrl\": \"https://example.com/readlater/smoke-item\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reading-list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reading-list"
+              ]
+            },
+            "description": "Создаём элемент. В тестовом скрипте сохраняем itemId и itemStatus в environment, чтобы следующий запрос сразу работал с этим ресурсом."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/reading-list/{{itemId}} -> 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"GET /api/v1/reading-list/{{itemId}} -> 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reading-list/{{itemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reading-list",
+                "{{itemId}}"
+              ]
+            },
+            "description": "Берём itemId из environment, который сохранился после POST, поэтому руками копировать id не нужно."
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /api/v1/reading-list/{{itemId}} -> 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Для smoke-проверки допускаем 200 или 204: обе формы означают, что full update отработал успешно.",
+                  "pm.test(\"PUT /api/v1/reading-list/{{itemId}} обновил ресурс\", function () {",
+                  "  pm.expect([200, 204]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"ReadLater smoke item updated\",\n  \"sourceUrl\": \"https://example.com/readlater/smoke-item\",\n  \"status\": \"{{itemStatus}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reading-list/{{itemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reading-list",
+                "{{itemId}}"
+              ]
+            },
+            "description": "Полное обновление уже созданного элемента. status берём из environment, чтобы не хардкодить значение enum в теле запроса."
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH /api/v1/reading-list/{{itemId}}/status -> 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// PATCH проверяет только частичное обновление статуса, поэтому не дублируем полный JSON объекта.",
+                  "pm.test(\"PATCH /api/v1/reading-list/{{itemId}}/status обновил статус\", function () {",
+                  "  pm.expect([200, 204]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"{{nextStatus}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reading-list/{{itemId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reading-list",
+                "{{itemId}}",
+                "status"
+              ]
+            },
+            "description": "Частично обновляем только status: переводим элемент в nextStatus из environment, чтобы изменение было видно при следующем чтении и не требовало ручной правки тела."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/reading-list/{{itemId}} -> 200 после PUT и PATCH",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"GET /api/v1/reading-list/{{itemId}} -> 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Читаем ресурс заново: так видно, что PUT и PATCH действительно изменили его на сервере.",
+                  "const json = pm.response.json();",
+                  "",
+                  "pm.test(\"PUT обновил title\", function () {",
+                  "  pm.expect(json.title).to.eql(\"ReadLater smoke item updated\");",
+                  "});",
+                  "",
+                  "pm.test(\"PATCH обновил status\", function () {",
+                  "  pm.expect(json.status).to.eql(pm.environment.get(\"nextStatus\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reading-list/{{itemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reading-list",
+                "{{itemId}}"
+              ]
+            },
+            "description": "Проверяем результат обновлений тем же itemId из environment."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /api/v1/reading-list/{{itemId}} -> 204",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// DELETE может вернуть 200 или 204 в зависимости от реализации, но в обоих случаях ресурс удалён.",
+                  "pm.test(\"DELETE /api/v1/reading-list/{{itemId}} завершился успешно\", function () {",
+                  "  pm.expect([200, 204]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reading-list/{{itemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reading-list",
+                "{{itemId}}"
+              ]
+            },
+            "description": "Удаляем созданный в этой папке ресурс: CRUD-сценарий заканчивается здесь же, а не в отдельной папке."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/reading-list/{{itemId}} -> 404 после DELETE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Удалённый ресурс больше не находится\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "// Сценарий закончен: чистим переменные, чтобы следующий запуск начинался с пустого состояния.",
+                  "pm.environment.unset(\"itemId\");",
+                  "pm.environment.unset(\"itemStatus\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reading-list/{{itemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reading-list",
+                "{{itemId}}"
+              ]
+            },
+            "description": "Подтверждаем удаление и сбрасываем environment."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 Negative",
+      "description": "Папку можно запускать отдельно от 02: запрос на 409 сам готовит конфликтующий ресурс и удаляет его после проверки.",
+      "item": [
+        {
+          "name": "GET /api/v1/reading-list/not-a-number -> 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"GET /api/v1/reading-list/not-a-number -> 400\", function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reading-list/not-a-number",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reading-list",
+                "not-a-number"
+              ]
+            },
+            "description": "Негативный сценарий для 400: нечисловой id ломает преобразование path variable ещё до поиска сущности."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/reading-list/999999999 -> 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"GET /api/v1/reading-list/999999999 -> 404\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reading-list/999999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reading-list",
+                "999999999"
+              ]
+            },
+            "description": "Негативный сценарий для 404: id корректный по формату, но сущность с таким идентификатором отсутствует."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /health -> 405 + Allow header",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"POST /health -> 405\", function () {",
+                  "  pm.response.to.have.status(405);",
+                  "});",
+                  "",
+                  "// 405 проверяем не только по статусу: заголовок Allow показывает, какие методы реально разрешены на этом endpoint.",
+                  "pm.test(\"В ответе есть заголовок Allow\", function () {",
+                  "  pm.expect(pm.response.headers.has(\"Allow\")).to.be.true;",
+                  "  pm.expect(pm.response.headers.get(\"Allow\")).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Негативный сценарий для 405: путь существует, но метод на этом endpoint не разрешён."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/reading-list -> 201 (подготовка к 409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Исходный ресурс для проверки 409 создан\", function () {",
+                  "  pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "// id нужен, чтобы после проверки конфликта удалить этот ресурс.",
+                  "pm.environment.set(\"conflictItemId\", String(pm.response.json().id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"ReadLater conflict item\",\n  \"sourceUrl\": \"https://example.com/readlater/conflict-item\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reading-list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reading-list"
+              ]
+            },
+            "description": "Создаём ресурс, с которым столкнётся следующий запрос. Отдельный sourceUrl не пересекается с элементом из папки 02."
+          },
+          "response": []
+        },
+        {
+          "name": "POST duplicate /api/v1/reading-list -> 409",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Повторяем тот же payload, что у предыдущего запроса, поэтому сервер получает точный дубликат.",
+                  "pm.test(\"POST duplicate /api/v1/reading-list -> 409\", function () {",
+                  "  pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"ReadLater conflict item\",\n  \"sourceUrl\": \"https://example.com/readlater/conflict-item\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reading-list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reading-list"
+              ]
+            },
+            "description": "Негативный сценарий для 409: повторно создаём ресурс, только что созданный предыдущим запросом, с тем же payload."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /api/v1/reading-list/{{conflictItemId}} -> 204 (уборка после 409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Ресурс для проверки 409 удалён\", function () {",
+                  "  pm.expect([200, 204]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "pm.environment.unset(\"conflictItemId\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reading-list/{{conflictItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reading-list",
+                "{{conflictItemId}}"
+              ]
+            },
+            "description": "Удаляем ресурс, созданный для проверки 409, чтобы папку можно было запустить повторно."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
